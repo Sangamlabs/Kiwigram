@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">Telegram</string>
-    <string name="AppNameBeta">Telegram Beta</string>
+    <string name="AppName">Kiwigram</string>
+    <string name="AppNameBeta">Kiwigram Beta</string>
     <string name="LanguageName">Español</string>
     <string name="English">Inglés</string>
     <string name="LanguageNameInEnglish">Spanish</string>
@@ -173,7 +173,7 @@
     <string name="NotificationGroupKickMember">%1$s eliminó a %3$s del grupo %2$s</string>
     <string name="NotificationGroupKickYou">%1$s te eliminó del grupo %2$s</string>
     <string name="NotificationGroupLeftMember">%1$s salió del grupo %2$s</string>
-    <string name="NotificationContactJoined">¡%1$s se unió a Telegram!</string>
+    <string name="NotificationContactJoined">¡%1$s se unió a Kiwigram!</string>
     <string name="NotificationUnrecognizedDevice">%1$s:\nDetectamos un inicio de sesión en tu cuenta desde un nuevo dispositivo el %2$s\n\nDispositivo: %3$s\nUbicación: %4$s\n\nSi no eras tú, puedes ir a Ajustes &gt; Dispositivos y cerrar esa sesión.\n\nSi crees que alguien inició sesión en tu cuenta sin tu consentimiento, puedes activar la verificación en dos pasos en los ajustes de privacidad y seguridad.\n\nAtentamente,\nEl equipo de Telegram</string>
     <string name="NotificationContactNewPhoto">%1$s cambió su foto de perfil</string>
     <string name="NotificationInvitedToGroupByLink">%1$s se unió al grupo %2$s con un enlace de invitación</string>
@@ -552,7 +552,7 @@
     <string name="DirectShareInfo">Chats recientes al compartir en Android</string>
     <string name="Emoji">Emojis</string>
     <string name="LargeEmoji">Emojis grandes</string>
-    <string name="TelegramVersion">Telegram para Android %1$s</string>
+    <string name="TelegramVersion">Kiwigram para Android %1$s</string>
     <string name="ChangeLanguageLater">Puedes cambiar el idioma más tarde en Ajustes.</string>
     <string name="ChooseYourLanguage">Elige tu idioma</string>
     <string name="ChooseYourLanguageOther">Otro</string>
@@ -1258,7 +1258,7 @@
     <string name="PermissionDrawAboveOtherAppsTitle">Modo imagen en imagen</string>
     <string name="PermissionDrawAboveOtherAppsGroupCallTitle">Superposición del videochat</string>
     <!--Intro view-->
-    <string name="Page1Title">Telegram</string>
+    <string name="Page1Title">Kiwigram</string>
     <string name="Page2Title">Rápido</string>
     <string name="Page3Title">Gratuito</string>
     <string name="Page4Title">Seguro</string>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">Telegram</string>
-    <string name="AppNameBeta">Telegram Beta</string>
+    <string name="AppName">Kiwigram</string>
+    <string name="AppNameBeta">Kiwigram Beta</string>
     <string name="LanguageName">Italiano</string>
     <string name="English">Inglese</string>
     <string name="LanguageNameInEnglish">Italian</string>
@@ -209,7 +209,7 @@
     <string name="NotificationGroupKickMember">%1$s ha rimosso %3$s dal gruppo %2$s</string>
     <string name="NotificationGroupKickYou">%1$s ti ha rimosso dal gruppo %2$s</string>
     <string name="NotificationGroupLeftMember">%1$s ha lasciato il gruppo %2$s</string>
-    <string name="NotificationContactJoined">%1$s è ora su Telegram!</string>
+    <string name="NotificationContactJoined">%1$s è ora su Kiwigram!</string>
     <string name="NotificationUnrecognizedDevice">%1$s,\nAbbiamo rilevato un accesso al tuo account da un nuovo dispositivo il %2$s\n\nDispositivo: %3$s\nPosizione: %4$s\n\nSe non sei stato tu, puoi andare in Impostazioni &gt; Dispositivi e terminare quella sessione.\n\nSe pensi che qualcuno si sia collegato al tuo account contro il tuo volere, puoi attivare la Verifica in due passaggi nelle impostazioni di Privacy e sicurezza.\n\nCordiali saluti,\nil team di Telegram</string>
     <string name="NotificationContactNewPhoto">%1$s ha aggiornato la foto del profilo</string>
     <string name="NotificationInvitedToGroupByLink">%1$s si è unito al gruppo %2$s tramite il link d\'invito</string>
@@ -588,7 +588,7 @@
     <string name="DirectShareInfo">Mostra le chat recenti nel menu di condivisione</string>
     <string name="Emoji">Emoji</string>
     <string name="LargeEmoji">Emoji grandi</string>
-    <string name="TelegramVersion">Telegram per Android %1$s</string>
+    <string name="TelegramVersion">Kiwigram per Android %1$s</string>
     <string name="DebugMenu">Menu debug</string>
     <string name="DebugMenuLongPress">Tieni premuto di nuovo per il menu di debug</string>
     <string name="DebugSendLogs">Invia i log</string>

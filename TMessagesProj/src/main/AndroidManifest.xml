@@ -94,6 +94,7 @@
 
     <application
         android:name="org.telegram.messenger.ApplicationLoader"
+        android:label="@string/AppName"
         android:allowBackup="true"
         android:restoreAnyVersion="true"
         android:backupAgent=".BackupAgent"
@@ -114,6 +115,7 @@
         <activity-alias
             android:enabled="true"
             android:name="org.telegram.messenger.DefaultIcon"
+            android:label="@string/AppName"
             android:targetActivity="org.telegram.ui.LaunchActivity"
             android:exported="true">
 

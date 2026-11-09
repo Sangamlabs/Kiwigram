@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">Telegram</string>
-    <string name="AppNameBeta">Telegram-bèta</string>
+    <string name="AppName">Kiwigram</string>
+    <string name="AppNameBeta">Kiwigram Beta</string>
     <string name="LanguageName">Nederlands</string>
     <string name="English">Engels</string>
     <string name="LanguageNameInEnglish">Dutch</string>
@@ -209,7 +209,7 @@
     <string name="NotificationGroupKickMember">%1$s heeft %3$s verwijderd uit de groep %2$s</string>
     <string name="NotificationGroupKickYou">%1$s heeft je verwijderd uit de groep %2$s</string>
     <string name="NotificationGroupLeftMember">%1$s heeft de groep %2$s verlaten</string>
-    <string name="NotificationContactJoined">%1$s zit nu op Telegram!</string>
+    <string name="NotificationContactJoined">%1$s zit nu op Kiwigram!</string>
     <string name="NotificationUnrecognizedDevice">%1$s,\nEr is op %2$s vanaf een nieuw apparaat op je account ingelogd.\n\nApparaat: %3$s\nLocatie: %4$s\n\nAls dit niet door jou is gedaan, kun je gaan naar Instellingen &gt; Apparaten en deze sessie beëindigen.\n\nAls je gelooft dat iemand zonder jouw toestemming op je account is ingelogd, kun je tweestapsverificatie inschakelen via Instellingen &gt; Privacy en veiligheid.\n\nMet vriendelijke groet,\nHet Telegram-team</string>
     <string name="NotificationContactNewPhoto">%1$s heeft zijn/haar profielfoto gewijzigd</string>
     <string name="NotificationInvitedToGroupByLink">%1$s is nu lid van de groep %2$s via uitnodigingslink</string>
@@ -589,7 +589,7 @@
     <string name="DirectShareInfo">Recente chats in snel delen weergeven</string>
     <string name="Emoji">Emoji</string>
     <string name="LargeEmoji">Grote emoji</string>
-    <string name="TelegramVersion">Telegram voor Android %1$s</string>
+    <string name="TelegramVersion">Kiwigram voor Android %1$s</string>
     <string name="ChangeLanguageLater">Via instellingen kun je je taal altijd aanpassen.</string>
     <string name="ChooseYourLanguage">Kies je taal</string>
     <string name="ChooseYourLanguageOther">Overige</string>

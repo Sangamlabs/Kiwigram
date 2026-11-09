@@ -1,46 +1,59 @@
-## Telegram messenger for Android
+# Kiwigram: Enhanced Android Client
 
-[Telegram](https://telegram.org) is a messaging app with a focus on speed and security. It’s superfast, simple and free.
-This repo contains the official source code for [Telegram App for Android](https://play.google.com/store/apps/details?id=org.telegram.messenger).
+[![Build Kiwigram Debug APK](https://github.com/Sangamlabs/Kiwigram/actions/workflows/build-debug.yml/badge.svg)](https://github.com/Sangamlabs/Kiwigram/actions/workflows/build-debug.yml)
 
-## Creating your Telegram Application
+**Kiwigram** is an advanced, premium Android messaging client built on Telegram's MTProto protocol. It combines full messaging compatibility with the Telegram network alongside powerful privacy and productivity enhancements:
 
-We welcome all developers to use our API and source code to create applications on our platform.
-There are several things we require from **all developers** for the moment.
+- **Modular Ghost Mode**: Granular, per-account control over Seen Ghost (stealth read receipts), Online Ghost (offline presence suppression), Typing Ghost, Recording Ghost (voice & video note stealth), and Story Ghost.
+- **Voice Chat (VC) Ghost**: Advanced voice chat stealth with Auto Mute on join, suppression of speaking indicators, suppression of raise-hand signals, and real-time MTProto compatibility inspection (`groupCall.listeners_hidden`).
+- **God Mode**: Safe message management with server-side sender-filtered deletion (`TL_messages_search`), bounded cursor pagination, and client-side authorship verification.
+- **Premium Crown Identity**: Distinctive Kiwigram crown branding, blue UI styling, adaptive launcher icons, and splash screens.
+- **Multi-Account Isolation**: Independent preference management across all registered accounts (`UserConfig.MAX_ACCOUNT_COUNT = 4`).
 
-1. [**Obtain your own api_id**](https://core.telegram.org/api/obtaining_api_id) for your application.
-2. Please **do not** use the name Telegram for your app — or make sure your users understand that it is unofficial.
-3. Kindly **do not** use our standard logo (white paper plane in a blue circle) as your app's logo.
-3. Please study our [**security guidelines**](https://core.telegram.org/mtproto/security_guidelines) and take good care of your users' data and privacy.
-4. Please remember to publish **your** code too in order to comply with the licences.
+---
 
-### API, Protocol documentation
+## Technical Architecture & Safety
 
-Telegram API manuals: https://core.telegram.org/api
+Kiwigram maintains full upstream compatibility with the official Telegram MTProto protocol:
+- Official MTProto protocol identifiers and serialization schemas are strictly preserved.
+- Server-side communication and authentication workflows operate directly against Telegram's secure cloud infrastructure.
+- Zero modification to upstream database schemas, encryption algorithms, or core network serialization.
 
-MTproto protocol manuals: https://core.telegram.org/mtproto
+---
 
-### Compilation Guide
+## Building from Source
 
-**Note**: In order to support [reproducible builds](https://core.telegram.org/reproducible-builds), this repo contains dummy release.keystore,  google-services.json and filled variables inside BuildVars.java. Before publishing your own APKs please make sure to replace all these files with your own.
+### Prerequisites
+- Android Studio Ladybug / Meerkat or later
+- Android SDK 36 (`platforms;android-36`, `build-tools;36.0.0`)
+- Android NDK `27.2.12479018`
+- CMake `3.22.1`
+- JDK 21 (Temurin 21 recommended)
 
-You will require Android Studio 2025.1.4, Android NDK 27.2.12479018 and Android SDK 36.
+### Build Commands
+```bash
+# Verify Java sources and compilation
+./gradlew :TMessagesProj:compileDebugSources --console=plain
 
-1. Clone the Telegram source code with its submodules:
-   ```bash
-   git clone --recursive --shallow-submodules https://github.com/DrKLO/Telegram.git Telegram
-   ```
-   In case you forgot the `--recursive` flag, change to the `Telegram` directory and run:
-   ```bash
-   git submodule init && git submodule update --init --recursive --depth=1
-   ```
-2. Copy your release.keystore into TMessagesProj/config
-3. Fill out RELEASE_KEY_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_STORE_PASSWORD in gradle.properties to access your  release.keystore
-4.  Go to https://console.firebase.google.com/, create two android apps with application IDs org.telegram.messenger and org.telegram.messenger.beta, turn on firebase messaging and download google-services.json, which should be copied to the same folder as TMessagesProj.
-5. Open the project in the Studio (note that it should be opened, NOT imported).
-6. Fill out values in TMessagesProj/src/main/java/org/telegram/messenger/BuildVars.java – there’s a link for each of the variables showing where and which data to obtain.
-7. You are ready to compile Telegram.
+# Run automated unit and benchmark test suite
+./gradlew :TMessagesProj:testDebugUnitTest --console=plain
 
-### Localization
+# Assemble Kiwigram Debug APK
+./gradlew :TMessagesProj_App:assembleAfatDebug --console=plain
+```
 
-We moved all translations to https://translations.telegram.org/en/android/. Please use it.
+The resulting debug package will be generated at:
+`TMessagesProj_App/build/outputs/apk/afat/debug/Kiwigram-Android-debug.apk`
+
+---
+
+## Automated CI/CD
+Automated builds and APK verification are continuously executed via GitHub Actions:
+- Workflow: [`.github/workflows/build-debug.yml`](.github/workflows/build-debug.yml)
+- Artifact Output: `Kiwigram-Android-debug.apk` (packaged under artifact `kiwigram-debug-apk`)
+
+---
+
+## License & Attribution
+Based on the DrKLO Telegram for Android source code, licensed under GNU GPL v2 / v3.
+All Telegram protocol, trademark, and original author attributions are preserved in accordance with licensing guidelines.

@@ -2,6 +2,7 @@
 <resources>
     <string name="AppName">Kiwigram</string>
     <string name="AppNameBeta">Kiwigram Beta</string>
+    <string name="AppDescription">Kiwigram Android Client</string>
     <!-- Kiwigram custom strings -->
     <string name="GhostMode">Ghost Mode</string>
     <string name="GhostModeEnabled">Ghost Mode enabled</string>
@@ -220,7 +221,7 @@
     <string name="NoResultFoundFor">No results found for \"%s\".</string>
     <string name="NoResultFoundForTag">No results found for %s</string>
     <string name="NoResultFoundFor2">There were no results for \"%s\".\nTry a new search.</string>
-    <string name="NoChats">Welcome to Telegram</string>
+    <string name="NoChats">Welcome to Kiwigram</string>
     <string name="RecentlyViewed">Recently viewed</string>
     <string name="RecentlyViewedHide">HIDE</string>
     <string name="NoChatsHelp">Start messaging by tapping the pencil button in the bottom right corner.</string>
@@ -382,17 +383,17 @@
     <string name="Superscript">Superscript</string>
     <string name="Regular">Regular</string>
     <string name="FormattedDate">Date</string>
-    <string name="ContactsPermissionAlert">**Telegram** needs access to your contacts so that you can connect with your friends across all your devices. Your contacts will be continuously synced with Telegram\'s heavily encrypted cloud servers.</string>
+    <string name="ContactsPermissionAlert">**Kiwigram** needs access to your contacts so that you can connect with your friends across all your devices. Your contacts will be continuously synced with Telegram\'s heavily encrypted cloud servers.</string>
     <string name="ContactsPermissionAlertNotNow">Not now</string>
     <string name="ContactsPermissionAlertContinue">Continue</string>
     <string name="NotificationsPermissionAlertTitle">Turn on notifications</string>
-    <string name="NotificationsPermissionAlertSubtitle">Please allow Telegram to send you notifications to stay in touch with your friends and family.</string>
+    <string name="NotificationsPermissionAlertSubtitle">Please allow Kiwigram to send you notifications to stay in touch with your friends and family.</string>
     <string name="NotificationsPermissionAlert1">Get notified about new messages</string>
     <string name="NotificationsPermissionAlert2">Learn when you are mentioned in groups</string>
     <string name="NotificationsPermissionAlert3">Mute specific chats and types of chats</string>
     <string name="NotificationsPermissionContinue">Continue</string>
     <string name="NotificationsPermissionSettings">Open Settings</string>
-    <string name="YourContacts">Your contacts on Telegram</string>
+    <string name="YourContacts">Your contacts on Kiwigram</string>
     <string name="ConnectingYourContacts">Connecting your contacts...</string>
     <string name="ArchiveHintHeader1">This is your Archive</string>
     <string name="ArchiveHintText1">Chats with enabled notifications get unarchived when new messages arrive.</string>
@@ -467,11 +468,11 @@
     <string name="ImportedInfo">This message was imported from another app. We can\'t guarantee it\'s real.</string>
     <string name="ImportUploading">Importing messages and media... **%d%%**</string>
     <string name="ImportImportingTitle">Importing chat</string>
-    <string name="ImportImportingInfo">Please keep Telegram open\nuntil the import is completed.</string>
+    <string name="ImportImportingInfo">Please keep Kiwigram open\nuntil the import is completed.</string>
     <string name="ImportCount">%1$s of %2$s</string>
     <string name="ImportDone">Done</string>
     <string name="ImportDoneTitle">Chat imported successfully!</string>
-    <string name="ImportDoneInfo">Save space on your device by importing more chats to Telegram.</string>
+    <string name="ImportDoneInfo">Save space on your device by importing more chats to Kiwigram.</string>
     <string name="ImporImportingService">Importing messages and media...</string>
     <string name="ImporImportingStickersService">Importing stickers...</string>
     <string name="ImportHeader">Import messages and media to...</string>
@@ -1854,7 +1855,7 @@
     <string name="NotificationGroupKickMember">%1$s removed %3$s from the group %2$s</string>
     <string name="NotificationGroupKickYou">%1$s removed you from the group %2$s</string>
     <string name="NotificationGroupLeftMember">%1$s left the group %2$s</string>
-    <string name="NotificationContactJoined">%1$s joined Telegram!</string>
+    <string name="NotificationContactJoined">%1$s joined Kiwigram!</string>
     <string name="NotificationUnrecognizedDevice">%1$s,\nWe detected a login into your account from a new device on %2$s\n\nDevice: %3$s\nLocation: %4$s\n\nIf this wasn\'t you, you can go to Settings - Privacy and Security - Sessions and terminate that session.\n\nIf you think that somebody logged in to your account against your will, you can enable two-step verification in Privacy and Security settings.\n\nSincerely,\nThe Telegram Team</string>
     <string name="NotificationContactNewPhoto">%1$s updated profile photo</string>
     <string name="NotificationInvitedToGroupByLink">%1$s joined to the group %2$s via invite link</string>
@@ -2426,7 +2427,7 @@
     <string name="NotificationsAndSounds">Notifications and Sounds</string>
     <string name="CustomNotifications">Custom Notifications</string>
     <string name="ProfilePopupNotification">Popup notifications</string>
-    <string name="ProfilePopupNotificationInfo">New messages from this contact will appear on your screen when you are not using Telegram.</string>
+    <string name="ProfilePopupNotificationInfo">New messages from this contact will appear on your screen when you are not using Kiwigram.</string>
     <string name="NotificationsLed">LED</string>
     <string name="NotificationsLedColor">Color</string>
     <string name="ColorBlue">Blue</string>
@@ -2527,12 +2528,12 @@
     <string name="LanguageUnknownTitle">Insufficient data</string>
     <string name="LanguageUnsupportedError">There is no such language.</string>
     <string name="LanguageSame">You are already using this language pack (**%1$s**). You can change your language at any time in Settings.</string>
-    <string name="LanguageUnknownCustomAlert">Unfortunately, this custom language pack (**%1$s**) doesn\'t contain data for Telegram Android.</string>
+    <string name="LanguageUnknownCustomAlert">Unfortunately, this custom language pack (**%1$s**) doesn\'t contain data for Kiwigram Android.</string>
     <string name="AskAQuestionInfo">Please note that Telegram Support is done by volunteers. We try to respond as quickly as possible, but it may take a while.\n\nPlease take a look at the <![CDATA[<a href=\"https://telegram.org/faq#general-questions\">Telegram FAQ</a>]]>: it has answers to most questions and important tips for <![CDATA[<a href=\"https://telegram.org/faq#troubleshooting\">troubleshooting</a>]]>.</string>
     <string name="AskButton">Ask a volunteer</string>
-    <string name="TelegramFAQ">Telegram FAQ</string>
-    <string name="TelegramFaq">Telegram FAQ</string>
-    <string name="TelegramFeatures">Telegram Features</string>
+    <string name="TelegramFAQ">Kiwigram FAQ</string>
+    <string name="TelegramFaq">Kiwigram FAQ</string>
+    <string name="TelegramFeatures">Kiwigram Features</string>
     <string name="TelegramFeaturesUrl">https://t.me/TelegramTips</string>
     <string name="AddAccount">Add Account</string>
     <string name="SwitchAccountHint">"Long tap to switch accounts"</string>
@@ -2550,7 +2551,7 @@
     <string name="NotificationsService">Keep-Alive Service</string>
     <string name="NotificationsServiceInfo">Relaunch app when shut down. Enable for reliable notifications.</string>
     <string name="NotificationsServiceConnection">Background Connection</string>
-    <string name="NotificationsServiceConnectionInfo">Keep a low impact background connection to Telegram for reliable notifications.</string>
+    <string name="NotificationsServiceConnectionInfo">Keep a low impact background connection to Kiwigram for reliable notifications.</string>
     <string name="SortBy">Sort By</string>
     <string name="ImportContacts">Import Contacts</string>
     <string name="SortFirstName">First name</string>
@@ -2680,7 +2681,7 @@
     <string name="DirectShareInfo">Show recent chats in Android share menu</string>
     <string name="Emoji">Emoji</string>
     <string name="LargeEmoji">Large Emoji</string>
-    <string name="TelegramVersion">Telegram for Android %1$s</string>
+    <string name="TelegramVersion">Kiwigram for Android %1$s</string>
     <string name="DebugMenu">Debug Menu</string>
     <string name="DebugMenuLongPress">Long press again for debug menu</string>
     <string name="DebugSendLogs">Send Logs</string>
@@ -3627,7 +3628,7 @@
     <string name="IncomingCalls">Incoming calls</string>
     <string name="IncomingCallsSystemSetting">Internal calls notifications</string>
     <string name="InternalNotificationsSystemSetting">Internal notifications</string>
-    <string name="IncomingCallsSystemSettingDescription">You can change ringtone sound in Telegram -> Settings -> Notifications and Sounds.</string>
+    <string name="IncomingCallsSystemSettingDescription">You can change ringtone sound in Kiwigram -> Settings -> Notifications and Sounds.</string>
     <string name="OutgoingCallsCount_one">%1$d outgoing call</string>
     <string name="OutgoingCallsCount_other">%1$d outgoing calls</string>
     <string name="IncomingCallsCount_one">%1$d incoming call</string>
@@ -4266,11 +4267,11 @@
     <string name="Page5Title">Powerful</string>
     <string name="Page6Title">Cloud-Based</string>
     <string name="Page1Message">The world\'s **fastest** messaging app.\nIt is **free** and **secure**.</string>
-    <string name="Page2Message">**Telegram** delivers messages faster than\nany other application.</string>
-    <string name="Page3Message">**Telegram** provides free unlimited cloud storage for chats and media.</string>
-    <string name="Page4Message">**Telegram** keeps your messages safe\nfrom hacker attacks.</string>
-    <string name="Page5Message">**Telegram** has no limits on\nthe size of your media and chats.</string>
-    <string name="Page6Message">**Telegram** lets you access your messages\nfrom multiple devices.</string>
+    <string name="Page2Message">**Kiwigram** delivers messages faster than\nany other application.</string>
+    <string name="Page3Message">**Kiwigram** provides free unlimited cloud storage for chats and media.</string>
+    <string name="Page4Message">**Kiwigram** keeps your messages safe\nfrom hacker attacks.</string>
+    <string name="Page5Message">**Kiwigram** has no limits on\nthe size of your media and chats.</string>
+    <string name="Page6Message">**Kiwigram** lets you access your messages\nfrom multiple devices.</string>
     <string name="StartMessaging">Start Messaging</string>
     <!-- VoIP -->
     <string name="AccountSettings">Account Settings</string>
@@ -5576,9 +5577,9 @@
     <string name="BlurInChat">Blur in chat</string>
 
     <string name="AllowBackgroundActivity">Allow background activity</string>
-    <string name="AllowBackgroundActivityInfo">This will improve reliability for incoming notifications and Telegram calls.</string>
-    <string name="AllowBackgroundActivityInfoOneUIBelowS">This will improve reliability for incoming notifications and Telegram calls. Tap Settings -> Battery and turn **Allow background activity** on.</string>
-    <string name="AllowBackgroundActivityInfoOneUIAboveS">This will improve reliability for incoming notifications and Telegram calls. Please select **Optimised** or **Unrestricted** in Settings > Battery.</string>
+    <string name="AllowBackgroundActivityInfo">This will improve reliability for incoming notifications and Kiwigram calls.</string>
+    <string name="AllowBackgroundActivityInfoOneUIBelowS">This will improve reliability for incoming notifications and Kiwigram calls. Tap Settings -> Battery and turn **Allow background activity** on.</string>
+    <string name="AllowBackgroundActivityInfoOneUIAboveS">This will improve reliability for incoming notifications and Kiwigram calls. Please select **Optimised** or **Unrestricted** in Settings > Battery.</string>
     <string name="SetNewPassword">Set a new password</string>
     <string name="ReadAllReactions">Read all reactions</string>
     <string name="ReadAllMentions">Read all mentions</string>

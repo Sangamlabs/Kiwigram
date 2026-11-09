@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">تيليجرام</string>
-    <string name="AppNameBeta">(Beta) تيليجرام</string>
+    <string name="AppName">Kiwigram</string>
+    <string name="AppNameBeta">Kiwigram Beta</string>
     <string name="LanguageName">العربية</string>
     <string name="English">الإنجليزية</string>
     <string name="LanguageNameInEnglish">Arabic</string>
@@ -173,7 +173,7 @@
     <string name="NotificationGroupKickMember">%1$s أزال %3$s من المجموعة %2$s</string>
     <string name="NotificationGroupKickYou">أزالك %1$s من مجموعة %2$s</string>
     <string name="NotificationGroupLeftMember">غادر %1$s مجموعة %2$s</string>
-    <string name="NotificationContactJoined">انضم %1$s لتيليجرام!</string>
+    <string name="NotificationContactJoined">انضم %1$s لـ Kiwigram!</string>
     <string name="NotificationUnrecognizedDevice">%1$s،\nلاحظنا تسجيل دخول إلى حسابك من جهاز جديد في: %2$s\n\nالجهاز: %3$s\nالموقع: %4$s\n\nإن لم يكن أنت من قام بتسجيل الدخول؛ فيمكنك الذهاب إلى الإعدادات &gt; الأجهزة وإنهاء تلك الجلسة.\n\nإن كنت تعتقد أن شخصًا ما قام بتسجيل الدخول دون إذنك؛ فيمكنك تفعيل التحقق بخطوتين في إعدادات الخصوصية والأمان.\n\nتحياتنا،\nفريق تيليجرام</string>
     <string name="NotificationContactNewPhoto">حدّثَ %1$s صورته الشخصية</string>
     <string name="NotificationInvitedToGroupByLink">%1$s انضم للمجموعة %2$s عبر رابط دعوة</string>
@@ -556,7 +556,7 @@
     <string name="DirectShareInfo">إظهار آخر المحادثات في قائمة المشاركة</string>
     <string name="Emoji">الرموز التعبيرية</string>
     <string name="LargeEmoji">رموز تعبيرية كبيرة</string>
-    <string name="TelegramVersion">تيليجرام للأندرويد %1$s</string>
+    <string name="TelegramVersion">Kiwigram للأندرويد %1$s</string>
     <string name="ChangeLanguageLater">يمكنك تغيير لغة التطبيق لاحقًا من الإعدادات.</string>
     <string name="ChooseYourLanguage">اختيار اللغة</string>
     <string name="ChooseYourLanguageOther">أخرى</string>
@@ -1191,7 +1191,7 @@
     <string name="TosUpdateDecline">للأسف، لا توجد خيارات أخرى. على عكس التطبيقات الأخرى؛ لا تستخدم تيليجرام بيانات المستخدمين لاستهدافهم بالإعلانات أو لأغراض تجارية أخرى. يخزن تيليجرام فقط المعلومات التي يحتاجها للعمل كخدمة سحابية غنية بالميزات. يمكنك ضبط كيفية استخدام بياناتك في إعدادات الخصوصية والأمان.\n\nإذا لم تكن مرتاحًا لاحتياجات تيليجرام المتواضعة؛ لن نتمكن من تزويدك بهذه الخدمة.</string>
     <string name="TosDeclineDeleteAccount">تحذير، سيؤدي هذا إلى حذف حسابك في تيليجرام بشكل نهائي بالإضافة لجميع البيانات التي تخزنها في سحابة تيليجرام.\n\nهام: يمكنك الإلغاء الآن وتصدير بياناتك قبل حذف حسابك عوضًا عن خسارتها كلها. (للقيام بذلك، افتح النسخة الأخيرة من تيليجرام لسطح المكتب وتوجه إلى الإعدادات &gt; إعدادات متقدمة &gt; تصدير بيانات تيليجرام).</string>
     <!--Intro view-->
-    <string name="Page1Title">تيليجرام</string>
+    <string name="Page1Title">Kiwigram</string>
     <string name="Page2Title">سريع</string>
     <string name="Page3Title">مجاني</string>
     <string name="Page4Title">آمن</string>

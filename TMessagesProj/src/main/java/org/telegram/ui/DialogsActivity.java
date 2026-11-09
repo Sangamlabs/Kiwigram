@@ -2921,6 +2921,7 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
     }
 
     private Drawable premiumStar;
+    private Drawable kiwigramCrownDrawable;
 
     public void updateStatus(TLRPC.User user, boolean animated) {
         if (dialogStoriesCell != null) {
@@ -2972,9 +2973,30 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             });
             SelectAnimatedEmojiDialog.preload(currentAccount);
         } else {
-            statusDrawable.set((Drawable) null, animated);
-            statusDrawable.setParticles(false, animated);
-            actionBar.setRightDrawableOnClick(null);
+            if (folderId == 0 && getParentActivity() != null) {
+                if (kiwigramCrownDrawable == null) {
+                    Drawable rawCrown = androidx.core.content.ContextCompat.getDrawable(getParentActivity(), R.drawable.ic_kiwigram_crown);
+                    if (rawCrown != null) {
+                        rawCrown = rawCrown.mutate();
+                        kiwigramCrownDrawable = new AnimatedEmojiDrawable.WrapSizeDrawable(rawCrown, dp(22), dp(22)) {
+                            @Override
+                            public void draw(@NonNull Canvas canvas) {
+                                canvas.save();
+                                canvas.translate(dp(2), dp(1));
+                                super.draw(canvas);
+                                canvas.restore();
+                            }
+                        };
+                    }
+                }
+                statusDrawable.set(kiwigramCrownDrawable, animated);
+                statusDrawable.setParticles(false, animated);
+                actionBar.setRightDrawableOnClick(null);
+            } else {
+                statusDrawable.set((Drawable) null, animated);
+                statusDrawable.setParticles(false, animated);
+                actionBar.setRightDrawableOnClick(null);
+            }
         }
         statusDrawable.setColor(getThemedColor(Theme.key_profile_verifiedBackground));
         if (animatedStatusView != null) {
@@ -3437,6 +3459,12 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                 statusDrawable.center = true;
                 actionBar.setTitle(getString(R.string.AppName), statusDrawable);
                 updateStatus(UserConfig.getInstance(currentAccount).getCurrentUser(), false);
+                if (folderId == 0 && actionBar != null) {
+                    SimpleTextView titleTextView = actionBar.getTitleTextView();
+                    if (titleTextView != null) {
+                        titleTextView.setTextColor(0xff1E88E5);
+                    }
+                }
             }
             if (folderId == 0) {
                 actionBar.setSupportsHolidayImage(true);
@@ -14186,6 +14214,12 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
         if (animatedStatusView != null) {
             animatedStatusView.setColor(color);
+        }
+        if (folderId == 0 && actionBar != null) {
+            SimpleTextView titleTextView = actionBar.getTitleTextView();
+            if (titleTextView != null) {
+                titleTextView.setTextColor(0xff1E88E5);
+            }
         }
     }
 

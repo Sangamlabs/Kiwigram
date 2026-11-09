@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">텔레그램</string>
-    <string name="AppNameBeta">텔레그램</string>
+    <string name="AppName">Kiwigram</string>
+    <string name="AppNameBeta">Kiwigram Beta</string>
     <string name="LanguageName">한국어</string>
     <string name="English">영어</string>
     <string name="LanguageNameInEnglish">한국어</string>
@@ -186,7 +186,7 @@
     <string name="NotificationGroupKickMember">%1$s 님이 %3$s 님을 %2$s 그룹에서 추방했습니다</string>
     <string name="NotificationGroupKickYou">%1$s 님이 나를 %2$s 그룹에서 추방했습니다</string>
     <string name="NotificationGroupLeftMember">%1$s 님이 %2$s 그룹에서 나갔습니다</string>
-    <string name="NotificationContactJoined">%1$s 님이 텔레그램에 가입했습니다!</string>
+    <string name="NotificationContactJoined">%1$s 님이 Kiwigram에 가입했습니다!</string>
     <string name="NotificationUnrecognizedDevice">%1$s 님,\n%2$s에 새로운 기기가 회원님의 계정에 로그인한 것을 감지했습니다.\n\n기기: %3$s\n위치: %4$s\n\n본인이 아니라면  설정 &gt; 기기에서  해당 세션을 종료하실 수 있습니다.\n\n누군가가 회원님의 뜻과 달리 계정에 접속했다고 생각하시면, 설정에서 2단계 인증을 활성화하실 수 있습니다.\n\n감사합니다.\n텔레그램 팀</string>
     <string name="NotificationContactNewPhoto">%1$s 님이 프로필 사진을 업데이트했습니다</string>
     <string name="NotificationInvitedToGroupByLink">초대 링크를 통해 %1$s 님이 %2$s 그룹에 들어왔습니다.</string>
@@ -589,7 +589,7 @@
     <string name="DirectShareInfo">안드로이드 공유 메뉴에 최근 대화방을 표시합니다</string>
     <string name="Emoji">이모지</string>
     <string name="LargeEmoji">큰 이모지</string>
-    <string name="TelegramVersion">Android용 텔레그램 %1$s</string>
+    <string name="TelegramVersion">Android용 Kiwigram %1$s</string>
     <string name="DebugMenu">디버그 메뉴</string>
     <string name="DebugMenuLongPress">디버그 메뉴로 이동하려면 길게 눌러주세요</string>
     <string name="DebugSendLogs">로그 보내기</string>

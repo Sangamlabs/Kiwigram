@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="AppName">Telegram</string>
-    <string name="AppNameBeta">Telegram Beta</string>
+    <string name="AppName">Kiwigram</string>
+    <string name="AppNameBeta">Kiwigram Beta</string>
     <string name="LanguageName">Português (Brasil)</string>
     <string name="English">Inglês</string>
     <string name="LanguageNameInEnglish">Portuguese (Brazil)</string>
@@ -173,7 +173,7 @@
     <string name="NotificationGroupKickMember">%1$s removeu %3$s do grupo %2$s</string>
     <string name="NotificationGroupKickYou">%1$s removeu você do grupo %2$s</string>
     <string name="NotificationGroupLeftMember">%1$s saiu do grupo %2$s</string>
-    <string name="NotificationContactJoined">%1$s entrou para o Telegram!</string>
+    <string name="NotificationContactJoined">%1$s entrou para o Kiwigram!</string>
     <string name="NotificationUnrecognizedDevice">%1$s,\nDetectamos que alguém acessou a sua conta a partir de um novo dispositivo em %2$s\n\nDispositivo: %3$s\nLocalização: %4$s\n\nSe não foi você, vá em Configurações &gt; Dispositivos e termine essa sessão.\n\nSe você acha que alguém acessou a sua conta sem a sua permissão, você pode habilitar a Verificação em Duas Etapas nas configurações de Privacidade e Segurança.\n\nAtenciosamente,\nEquipe do Telegram.</string>
     <string name="NotificationContactNewPhoto">%1$s atualizou a foto do perfil</string>
     <string name="NotificationInvitedToGroupByLink">%1$s entrou para o grupo %2$s via link de convite</string>
@@ -576,7 +576,7 @@
     <string name="DirectShareInfo">Mostra chats recentes no menu compartilhar.</string>
     <string name="Emoji">Emoji</string>
     <string name="LargeEmoji">Emoji Grande</string>
-    <string name="TelegramVersion">Telegram para Android %1$s</string>
+    <string name="TelegramVersion">Kiwigram para Android %1$s</string>
     <string name="DebugMenu">Menu de Depuração</string>
     <string name="DebugMenuLongPress">Segure de novo para ver o menu de depuração</string>
     <string name="DebugSendLogs">Enviar Logs</string>
@@ -1192,7 +1192,7 @@
     <string name="PermissionDrawAboveOtherAppsTitle">Picture-in-Picture</string>
     <string name="PermissionDrawAboveOtherAppsGroupCallTitle">Chat de vídeo flutuante</string>
     <!--Intro view-->
-    <string name="Page1Title">Telegram</string>
+    <string name="Page1Title">Kiwigram</string>
     <string name="Page2Title">Rápido</string>
     <string name="Page3Title">Gratuito</string>
     <string name="Page4Title">Seguro</string>
