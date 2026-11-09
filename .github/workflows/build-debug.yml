@@ -88,6 +88,36 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Create CI-only debug keystore
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          KEYSTORE="TMessagesProj/config/release.keystore"
+          if [ ! -f "$KEYSTORE" ]; then
+            STORE_PASSWORD="$(sed -n 's/^RELEASE_STORE_PASSWORD=//p' gradle.properties | tail -n 1)"
+            KEY_PASSWORD="$(sed -n 's/^RELEASE_KEY_PASSWORD=//p' gradle.properties | tail -n 1)"
+            KEY_ALIAS="$(sed -n 's/^RELEASE_KEY_ALIAS=//p' gradle.properties | tail -n 1)"
+
+            test -n "$STORE_PASSWORD"
+            test -n "$KEY_PASSWORD"
+            test -n "$KEY_ALIAS"
+            mkdir -p "$(dirname "$KEYSTORE")"
+
+            keytool -genkeypair -noprompt -v \
+              -keystore "$KEYSTORE" \
+              -storetype JKS \
+              -storepass "$STORE_PASSWORD" \
+              -alias "$KEY_ALIAS" \
+              -keypass "$KEY_PASSWORD" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Kiwigram CI Debug, OU=Build, O=Sangamlabs, C=IN"
+
+            echo "Generated ephemeral CI debug keystore. Do not use this key for releases."
+          else
+            echo "Signing keystore already exists; leaving it unchanged."
+          fi
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
         with:
