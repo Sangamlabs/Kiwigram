@@ -36,12 +36,20 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
         with:
-          packages: |
-            platform-tools
-            platforms;android-36
-            build-tools;36.0.0
-            ndk;27.2.12479018
-            cmake;3.22.1
+          packages: ''
+
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | sdkmanager --licenses || true
+
+      - name: Install Android SDK Components
+        run: |
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;27.2.12479018" \
+            "cmake;3.22.1"
 
       - name: Make Gradlew Executable
         run: chmod +x ./gradlew
