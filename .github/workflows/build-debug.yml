@@ -53,32 +53,63 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
 
       - name: Make Gradlew Executable
         run: chmod +x ./gradlew
 
-      - name: Download Gradle Distribution (with retry)
+      - name: Ensure Gradle 8.13 Distribution Ready
         run: |
-          SUCCESS=0
-          for i in 1 2 3; do
-            echo "Attempt $i: downloading and verifying Gradle wrapper..."
-            if ./gradlew --version --no-daemon; then
-              echo "Gradle wrapper ready."
-              SUCCESS=1
-              break
-            else
-              echo "Attempt $i failed. Cleaning up partial download..."
-              find ~/.gradle/wrapper/dists/ -name "*.part" -delete 2>/dev/null || true
-              if [ $i -lt 3 ]; then
-                echo "Retrying in 15 seconds..."
-                sleep 15
+          DIST_DIR="$HOME/.gradle/wrapper/dists/gradle-8.13-bin/5xuhj0ry160q40clulazy9h7d"
+          EXPECTED_SHA="20f1b1176237254a6fc204d8434196fa11a4cfb387567519c61556e8710aed78"
+
+          if [ -f "$DIST_DIR/gradle-8.13-bin.zip.ok" ] && [ -d "$DIST_DIR/gradle-8.13" ]; then
+            echo "Gradle 8.13 distribution already present and verified in cache."
+          else
+            mkdir -p "$DIST_DIR"
+            NEED_DOWNLOAD=1
+            if [ -f "$DIST_DIR/gradle-8.13-bin.zip" ]; then
+              ACTUAL_SHA=$(sha256sum "$DIST_DIR/gradle-8.13-bin.zip" | awk '{print $1}')
+              if [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ]; then
+                echo "Pre-existing gradle-8.13-bin.zip matches official SHA-256."
+                NEED_DOWNLOAD=0
+              else
+                echo "Cached zip failed checksum, removing."
+                rm -f "$DIST_DIR/gradle-8.13-bin.zip"
               fi
             fi
-          done
-          if [ $SUCCESS -ne 1 ]; then
-            echo "Failed to download Gradle wrapper after 3 attempts."
-            exit 1
+
+            if [ $NEED_DOWNLOAD -eq 1 ]; then
+              echo "Downloading gradle-8.13-bin.zip from official Gradle distribution endpoints..."
+              URLS=(
+                "https://services.gradle.org/distributions/gradle-8.13-bin.zip"
+                "https://downloads.gradle.org/distributions/gradle-8.13-bin.zip"
+              )
+              DOWNLOAD_SUCCESS=0
+              for url in "${URLS[@]}"; do
+                echo "Trying official endpoint: $url"
+                if curl -fL --retry 3 --retry-delay 5 --retry-connrefused --connect-timeout 30 --max-time 300 -o "$DIST_DIR/gradle-8.13-bin.zip" "$url"; then
+                  ACTUAL_SHA=$(sha256sum "$DIST_DIR/gradle-8.13-bin.zip" | awk '{print $1}')
+                  if [ "$ACTUAL_SHA" = "$EXPECTED_SHA" ]; then
+                    echo "SHA-256 verification SUCCESS: $ACTUAL_SHA"
+                    DOWNLOAD_SUCCESS=1
+                    break
+                  else
+                    echo "SHA-256 verification FAILED: expected $EXPECTED_SHA, got $ACTUAL_SHA"
+                    rm -f "$DIST_DIR/gradle-8.13-bin.zip"
+                  fi
+                fi
+              done
+
+              if [ $DOWNLOAD_SUCCESS -ne 1 ]; then
+                echo "Failed to download verified Gradle 8.13 distribution from official endpoints."
+                exit 1
+              fi
+            fi
           fi
+
+          ./gradlew --version --no-daemon
 
       - name: Compile and Assemble Debug APK
         run: |
