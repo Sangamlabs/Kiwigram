@@ -51,13 +51,39 @@ jobs:
             "ndk;27.2.12479018" \
             "cmake;3.22.1"
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Make Gradlew Executable
         run: chmod +x ./gradlew
+
+      - name: Download Gradle Distribution (with retry)
+        run: |
+          SUCCESS=0
+          for i in 1 2 3; do
+            echo "Attempt $i: downloading and verifying Gradle wrapper..."
+            if ./gradlew --version --no-daemon; then
+              echo "Gradle wrapper ready."
+              SUCCESS=1
+              break
+            else
+              echo "Attempt $i failed. Cleaning up partial download..."
+              find ~/.gradle/wrapper/dists/ -name "*.part" -delete 2>/dev/null || true
+              if [ $i -lt 3 ]; then
+                echo "Retrying in 15 seconds..."
+                sleep 15
+              fi
+            fi
+          done
+          if [ $SUCCESS -ne 1 ]; then
+            echo "Failed to download Gradle wrapper after 3 attempts."
+            exit 1
+          fi
 
       - name: Compile and Assemble Debug APK
         run: |
           ./gradlew :TMessagesProj:compileDebugSources --console=plain --stacktrace
-          ./gradlew :TMessagesProj_App:assembleAfatDebug --console=plain --stacktrace || ./gradlew assembleDebug --console=plain --stacktrace
+          ./gradlew :TMessagesProj_App:assembleAfatDebug --console=plain --stacktrace
 
       - name: Locate Debug APK
         id: find_apk
