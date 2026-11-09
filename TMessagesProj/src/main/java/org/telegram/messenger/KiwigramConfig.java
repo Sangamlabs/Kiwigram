@@ -23,7 +23,7 @@ public class KiwigramConfig {
 
     // God Mode
     public static boolean godMode = false;
-    public static boolean preserveDeletedMessages = true;
+    public static boolean preserveDeletedMessages = false;
 
     // Kiwigram Plus (Themes & Typography & Customization)
     public static int customFontIndex = 0;
@@ -58,7 +58,7 @@ public class KiwigramConfig {
             stealthStories = prefs.getBoolean("stealthStories", false);
 
             godMode = prefs.getBoolean("godMode", false);
-            preserveDeletedMessages = prefs.getBoolean("preserveDeletedMessages", true);
+            preserveDeletedMessages = prefs.getBoolean("preserveDeletedMessages", false);
 
             customFontIndex = prefs.getInt("customFontIndex", 0);
             customBubbleStyle = prefs.getInt("customBubbleStyle", 0);
@@ -112,6 +112,10 @@ public class KiwigramConfig {
         saveConfig();
         for (int i = 0; i < UserConfig.MAX_ACCOUNT_COUNT; i++) {
             if (UserConfig.getInstance(i).isClientActivated()) {
+                final int account = i;
+                Utilities.stageQueue.postRunnable(() -> {
+                    MessagesController.getInstance(account).updateTimerProc();
+                });
                 NotificationCenter.getInstance(i).postNotificationName(NotificationCenter.mainUserInfoChanged);
             }
         }
