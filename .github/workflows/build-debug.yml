@@ -28,6 +28,60 @@ jobs:
           fetch-depth: 1
           submodules: recursive
 
+      - name: Restore omitted native dependency checkouts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          checkout_pinned() {
+            local url="$1"
+            local path="$2"
+            local revision="$3"
+
+            if [ -f "$path/.git" ] || [ -d "$path/.git" ]; then
+              echo "Already initialized: $path"
+              return
+            fi
+
+            if [ -e "$path" ]; then
+              echo "Refusing to overwrite existing non-git path: $path" >&2
+              exit 1
+            fi
+
+            mkdir -p "$(dirname "$path")"
+            git init "$path"
+            git -C "$path" remote add origin "$url"
+            git -C "$path" fetch --depth=1 origin "$revision"
+            git -C "$path" checkout --detach FETCH_HEAD
+            echo "Checked out $path at $revision"
+          }
+
+          # These gitlinks are listed in .gitmodules but were omitted from
+          # the Kiwigram superproject tree. Pin to the matching Telegram
+          # 13.2.1 upstream tree (DrKLO/Telegram master, 7be672ead283d022812d75c729d3a04dd4c2a2c6).
+          checkout_pinned "https://github.com/dkaraush/tlottie.git" "TMessagesProj/jni/tlottie" "31f1b542f88e7b4be9a01e749920d857535fc715"
+          checkout_pinned "https://github.com/webmproject/libvpx.git" "TMessagesProj/jni/third_party/libvpx" "6df3ec34557879fff673706f4a1d9fbd0f3a6f0e"
+          checkout_pinned "https://github.com/videolan/dav1d.git" "TMessagesProj/jni/third_party/dav1d" "54706fc6bc0cdecab7e9593974a4039cc038fca7"
+          checkout_pinned "https://github.com/FFmpeg/FFmpeg.git" "TMessagesProj/jni/third_party/ffmpeg" "8dca1586f468bfcbb78ae3ed618af1361d9f140a"
+          checkout_pinned "https://github.com/xiph/ogg.git" "TMessagesProj/jni/third_party/xiph/ogg" "be05b13e98b048f0b5a0f5fa8ce514d56db5f822"
+          checkout_pinned "https://github.com/xiph/opusfile.git" "TMessagesProj/jni/third_party/xiph/opusfile" "a55c164e9891a9326188b7d4d216ec9a88373739"
+          checkout_pinned "https://github.com/xiph/opus.git" "TMessagesProj/jni/third_party/xiph/opus" "22244de5a79bd1d6d623c32e72bf1954b56235be"
+          checkout_pinned "https://chromium.googlesource.com/libyuv/libyuv" "TMessagesProj/jni/third_party/libyuv" "28ce69c2744a6aafdb58564e7b884aec3f66be5f"
+          checkout_pinned "https://github.com/cisco/openh264.git" "TMessagesProj/jni/third_party/openh264" "652bdb7719f30b52b08e506645a7322ff1b2cc6f"
+          checkout_pinned "https://github.com/google/boringssl.git" "TMessagesProj/jni/third_party/boringssl" "2b44a3701a4788e1ef866ddc7f143060a3d196c9"
+          checkout_pinned "https://github.com/tdlib/td.git" "TMessagesProj/jni/td" "022d60202e446ad1287b9fb68e687c8a0760788b"
+          checkout_pinned "https://github.com/abseil/abseil-cpp.git" "TMessagesProj/jni/third_party/absl" "54fac219c4ef0bc379dfffb0b8098725d77ac81b"
+          checkout_pinned "https://github.com/wasm-micro-runtime/wasm-micro-runtime.git" "TMessagesProj/jni/third_party/wamr" "25bd7eb63e828e4bd242cc9b38d260b4b31c6605"
+          checkout_pinned "https://github.com/TelegramMessenger/tgcalls.git" "TMessagesProj/jni/tgcalls" "545f5ae599f8282e1ae3f38aaff166d179d75703"
+          checkout_pinned "https://github.com/dkaraush/wallet-engine.git" "TMessagesProj/jni/wallet-engine" "5c65e47cb8d68727c20d89382d0bc51292486b9a"
+          checkout_pinned "https://github.com/boostorg/regex.git" "TMessagesProj/jni/third_party/boost-regex" "4cbcd3078e6ae10d05124379623a1bf03fcb9350"
+          checkout_pinned "https://github.com/TelegramMessenger/libprisma.git" "TMessagesProj/jni/third_party/libprisma" "94640c63c20eacdf70e37e23198d9ab53c802ebd"
+
+          test -f TMessagesProj/jni/third_party/libyuv/include/libyuv.h
+          test -f TMessagesProj/jni/third_party/absl/CMakeLists.txt
+          test -f TMessagesProj/jni/third_party/libprisma/libprisma/SyntaxHighlighter.cpp
+          test -f TMessagesProj/jni/third_party/boost-regex/include/boost/regex.hpp
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
