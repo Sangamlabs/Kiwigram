@@ -5,16 +5,26 @@
 package org.telegram.messenger;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.util.TypedValue;
+import android.view.Gravity;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.LinkedHashSet;
+
 import org.telegram.tgnet.ConnectionsManager;
+import org.telegram.tgnet.TLObject;
 import org.telegram.tgnet.TLRPC;
 import org.telegram.ui.ActionBar.AlertDialog;
 import org.telegram.ui.ActionBar.BaseFragment;
 import org.telegram.ui.ActionBar.Theme;
 import org.telegram.ui.Components.BulletinFactory;
+import org.telegram.ui.Components.LayoutHelper;
 
 public class KiwigramDeleteHelper {
 
@@ -23,10 +33,40 @@ public class KiwigramDeleteHelper {
     public static class TaskContext {
         public volatile boolean isCancelled = false;
         public AlertDialog activeDialog;
+        public TextView statusTextView;
+        public TextView statsTextView;
+        public ProgressBar progressBar;
+
         public int scannedCount = 0;
         public int foundCount = 0;
-        public final ArrayList<Integer> mainPeerMessageIds = new ArrayList<>();
-        public final ArrayList<Integer> mergedPeerMessageIds = new ArrayList<>();
+        public int deletedCount = 0;
+        public int failedCount = 0;
+
+        public final LinkedHashSet<Integer> mainPeerMessageIds = new LinkedHashSet<>();
+        public final LinkedHashSet<Integer> mergedPeerMessageIds = new LinkedHashSet<>();
+
+        public void updateUi(String status, int progressPercent, int totalTarget) {
+            AndroidUtilities.runOnUIThread(() -> {
+                if (activeDialog == null || isCancelled) {
+                    return;
+                }
+                if (statusTextView != null) {
+                    statusTextView.setText(status);
+                }
+                if (statsTextView != null) {
+                    statsTextView.setText(String.format("Searched: %d | Found: %d | Deleted: %d | Failed: %d",
+                            scannedCount, foundCount, deletedCount, failedCount));
+                }
+                if (progressBar != null) {
+                    if (progressPercent >= 0) {
+                        progressBar.setIndeterminate(false);
+                        progressBar.setProgress(progressPercent);
+                    } else {
+                        progressBar.setIndeterminate(true);
+                    }
+                }
+            });
+        }
     }
 
     public static void startDeleteAllMyMessages(BaseFragment fragment, long dialogId, long mergeDialogId, int topicId) {
@@ -50,35 +90,70 @@ public class KiwigramDeleteHelper {
         }
 
         TaskContext task = new TaskContext();
+        createProgressDialog(activity, task, "Searching your messages server-side...", () -> task.isCancelled = true);
+        fragment.showDialog(task.activeDialog);
 
-        AlertDialog progressDialog = new AlertDialog(activity, AlertDialog.ALERT_TYPE_LOADING);
-        progressDialog.setTitle(LocaleController.getString(R.string.DeleteAllMyMessages));
-        progressDialog.setMessage(LocaleController.getString(R.string.DeleteAllMyMessagesProgress));
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setCancelable(true);
-        progressDialog.setOnCancelListener(di -> task.isCancelled = true);
-        progressDialog.setNegativeButton(LocaleController.getString(R.string.Cancel), (di, w) -> {
+        final TLRPC.Chat finalChat = chat;
+        Utilities.globalQueue.postRunnable(() -> {
+            searchUserMessages(task, fragment, currentAccount, dialogId, mergeDialogId, topicId, myUserId, finalChat);
+        });
+    }
+
+    private static void createProgressDialog(Context context, TaskContext task, String initialStatus, Runnable onCancel) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(LocaleController.getString(R.string.DeleteAllMyMessages));
+
+        LinearLayout container = new LinearLayout(context);
+        container.setOrientation(LinearLayout.VERTICAL);
+        container.setPadding(AndroidUtilities.dp(24), AndroidUtilities.dp(16), AndroidUtilities.dp(24), AndroidUtilities.dp(16));
+
+        task.statusTextView = new TextView(context);
+        task.statusTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
+        task.statusTextView.setTextColor(Theme.getColor(Theme.key_dialogTextBlack));
+        task.statusTextView.setText(initialStatus);
+        container.addView(task.statusTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 10));
+
+        task.statsTextView = new TextView(context);
+        task.statsTextView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+        task.statsTextView.setTextColor(Theme.getColor(Theme.key_dialogTextGray2));
+        task.statsTextView.setText("Searched: 0 | Found: 0 | Deleted: 0 | Failed: 0");
+        container.addView(task.statsTextView, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, 0, 0, 0, 14));
+
+        task.progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
+        task.progressBar.setIndeterminate(true);
+        task.progressBar.setMax(100);
+        container.addView(task.progressBar, LayoutHelper.createLinear(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT));
+
+        builder.setView(container);
+        builder.setNegativeButton(LocaleController.getString(R.string.Cancel), (di, w) -> {
             task.isCancelled = true;
+            if (onCancel != null) {
+                onCancel.run();
+            }
             try {
                 di.dismiss();
             } catch (Exception ignored) {}
         });
 
-        fragment.showDialog(progressDialog);
-        task.activeDialog = progressDialog;
-
-        final TLRPC.Chat finalChat = chat;
-        Utilities.globalQueue.postRunnable(() -> {
-            scanHistoryForUserMessages(task, fragment, currentAccount, dialogId, mergeDialogId, topicId, myUserId, finalChat);
+        AlertDialog dialog = builder.create();
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(true);
+        dialog.setOnCancelListener(di -> {
+            task.isCancelled = true;
+            if (onCancel != null) {
+                onCancel.run();
+            }
         });
+
+        task.activeDialog = dialog;
     }
 
-    private static void scanHistoryForUserMessages(TaskContext task, BaseFragment fragment, int currentAccount, long dialogId, long mergeDialogId, int topicId, long myUserId, TLRPC.Chat chat) {
-        scanPeerHistory(task, fragment, currentAccount, dialogId, topicId, myUserId, chat, task.mainPeerMessageIds);
+    private static void searchUserMessages(TaskContext task, BaseFragment fragment, int currentAccount, long dialogId, long mergeDialogId, int topicId, long myUserId, TLRPC.Chat chat) {
+        searchPeerMessages(task, currentAccount, dialogId, topicId, myUserId, chat, task.mainPeerMessageIds);
 
         if (!task.isCancelled && mergeDialogId != 0) {
             TLRPC.Chat mergedChat = MessagesController.getInstance(currentAccount).getChat(-mergeDialogId);
-            scanPeerHistory(task, fragment, currentAccount, mergeDialogId, 0, myUserId, mergedChat, task.mergedPeerMessageIds);
+            searchPeerMessages(task, currentAccount, mergeDialogId, 0, myUserId, mergedChat, task.mergedPeerMessageIds);
         }
 
         AndroidUtilities.runOnUIThread(() -> {
@@ -97,17 +172,16 @@ public class KiwigramDeleteHelper {
             if (totalFound == 0) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(fragment.getParentActivity());
                 builder.setTitle(LocaleController.getString(R.string.DeleteAllMyMessages));
-                builder.setMessage(LocaleController.getString(R.string.NoResult));
+                builder.setMessage("No eligible messages sent by your account were found in this chat.");
                 builder.setPositiveButton(LocaleController.getString(R.string.OK), null);
                 fragment.showDialog(builder.create());
                 return;
             }
 
-            // Show confirmation dialog before performing deletion
+            // Confirmation Dialog with total message count and clear warning
             AlertDialog.Builder confirmBuilder = new AlertDialog.Builder(fragment.getParentActivity());
             confirmBuilder.setTitle(LocaleController.getString(R.string.DeleteAllMyMessagesTitle));
-            String desc = LocaleController.getString(R.string.DeleteAllMyMessagesDesc) + "\n\n" +
-                          LocaleController.formatPluralString("messages", totalFound);
+            String desc = String.format("Found %d of your messages in this chat.\n\nAre you sure you want to permanently delete them for everyone? This operation cannot be undone.", totalFound);
             confirmBuilder.setMessage(desc);
             confirmBuilder.setPositiveButton(LocaleController.getString(R.string.DeleteAllMyMessagesConfirm) + " (" + totalFound + ")", (di, w) -> {
                 executeBatchDeletion(task, fragment, currentAccount, dialogId, mergeDialogId, topicId, totalFound);
@@ -123,27 +197,55 @@ public class KiwigramDeleteHelper {
         });
     }
 
-    private static void scanPeerHistory(TaskContext task, BaseFragment fragment, int currentAccount, long targetDialogId, int topicId, long myUserId, TLRPC.Chat chat, ArrayList<Integer> collectedIds) {
+    private static void searchPeerMessages(TaskContext task, int currentAccount, long targetDialogId, int topicId, long myUserId, TLRPC.Chat chat, LinkedHashSet<Integer> collectedIds) {
+        boolean useServerSideSearch = true;
         int offsetId = 0;
+        int lastOffsetId = -1;
         boolean hasMore = true;
 
         while (hasMore && !task.isCancelled) {
             final Object syncObj = new Object();
             final boolean[] requestFinished = new boolean[1];
             final TLRPC.messages_Messages[] resultHolder = new TLRPC.messages_Messages[1];
+            final TLRPC.TL_error[] errorHolder = new TLRPC.TL_error[1];
 
-            TLRPC.TL_messages_getHistory req = new TLRPC.TL_messages_getHistory();
-            req.peer = MessagesController.getInstance(currentAccount).getInputPeer(targetDialogId);
-            if (req.peer == null) {
+            TLObject request;
+            TLRPC.InputPeer targetPeer = MessagesController.getInstance(currentAccount).getInputPeer(targetDialogId);
+            if (targetPeer == null) {
                 break;
             }
-            req.limit = BATCH_SIZE;
-            req.offset_id = offsetId;
 
-            ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
+            if (useServerSideSearch) {
+                // Server-side filtered search by from_id = current user
+                TLRPC.TL_messages_search req = new TLRPC.TL_messages_search();
+                req.peer = targetPeer;
+                req.q = "";
+                req.from_id = MessagesController.getInstance(currentAccount).getInputPeer(myUserId);
+                req.flags |= 1;
+                req.filter = new TLRPC.TL_inputMessagesFilterEmpty();
+                req.offset_id = offsetId;
+                req.limit = BATCH_SIZE;
+                if (topicId != 0) {
+                    req.top_msg_id = topicId;
+                    req.flags |= 2;
+                }
+                request = req;
+            } else {
+                // Fallback sequential scan if server returns RPC error for peer/query
+                TLRPC.TL_messages_getHistory req = new TLRPC.TL_messages_getHistory();
+                req.peer = targetPeer;
+                req.offset_id = offsetId;
+                req.limit = BATCH_SIZE;
+                request = req;
+            }
+
+            ConnectionsManager.getInstance(currentAccount).sendRequest(request, (response, error) -> {
                 synchronized (syncObj) {
                     if (response instanceof TLRPC.messages_Messages) {
                         resultHolder[0] = (TLRPC.messages_Messages) response;
+                    }
+                    if (error != null) {
+                        errorHolder[0] = error;
                     }
                     requestFinished[0] = true;
                     syncObj.notifyAll();
@@ -153,7 +255,7 @@ public class KiwigramDeleteHelper {
             synchronized (syncObj) {
                 while (!requestFinished[0]) {
                     try {
-                        syncObj.wait(5000);
+                        syncObj.wait(6000);
                     } catch (InterruptedException ignored) {
                         task.isCancelled = true;
                         break;
@@ -161,12 +263,32 @@ public class KiwigramDeleteHelper {
                 }
             }
 
-            if (task.isCancelled || resultHolder[0] == null || resultHolder[0].messages.isEmpty()) {
+            if (task.isCancelled) {
+                break;
+            }
+
+            // Handle RPC error fallback for server-side search
+            if (errorHolder[0] != null) {
+                if (useServerSideSearch) {
+                    // Fall back to getHistory if server does not support empty query search with from_id on this chat type
+                    useServerSideSearch = false;
+                    offsetId = 0;
+                    lastOffsetId = -1;
+                    continue;
+                } else {
+                    // Fatal getHistory error, abort
+                    break;
+                }
+            }
+
+            if (resultHolder[0] == null || resultHolder[0].messages.isEmpty()) {
                 hasMore = false;
                 break;
             }
 
             ArrayList<TLRPC.Message> messages = resultHolder[0].messages;
+            int previousFound = collectedIds.size();
+
             for (int a = 0; a < messages.size(); a++) {
                 TLRPC.Message msg = messages.get(a);
                 task.scannedCount++;
@@ -178,7 +300,7 @@ public class KiwigramDeleteHelper {
                     continue;
                 }
 
-                // Authorship verification: verify outgoing status and matching user ID
+                // Strict Authorship Verification: only collect messages sent by the logged-in user
                 boolean isMine = msg.out;
                 if (isMine && msg.from_id != null) {
                     if (msg.from_id instanceof TLRPC.TL_peerUser) {
@@ -186,36 +308,32 @@ public class KiwigramDeleteHelper {
                     } else {
                         isMine = false;
                     }
+                } else if (!isMine && msg.from_id != null) {
+                    if (msg.from_id instanceof TLRPC.TL_peerUser) {
+                        isMine = (((TLRPC.TL_peerUser) msg.from_id).user_id == myUserId);
+                    }
                 }
 
                 if (isMine && msg.id > 0) {
                     collectedIds.add(msg.id);
-                    task.foundCount++;
                 }
 
                 offsetId = msg.id;
             }
 
-            if (messages.size() < BATCH_SIZE) {
+            task.foundCount = collectedIds.size();
+
+            // Prevent infinite pagination loop
+            if (offsetId == lastOffsetId || messages.size() < BATCH_SIZE) {
                 hasMore = false;
             }
+            lastOffsetId = offsetId;
 
-            // Update scanning progress on UI
-            final int scanned = task.scannedCount;
-            final int found = task.foundCount;
-            AndroidUtilities.runOnUIThread(() -> {
-                if (task.activeDialog != null && !task.isCancelled) {
-                    try {
-                        task.activeDialog.setMessage(LocaleController.getString(R.string.DeleteAllMyMessagesProgress) +
-                            "\nScanned: " + scanned + " | Found: " + found);
-                    } catch (Exception ignored) {}
-                }
-            });
+            task.updateUi("Searching your messages...", -1, 0);
 
-            // Prevent UI starvation and excessive flood
             try {
-                Thread.sleep(150);
-            } catch (InterruptedException e) {
+                Thread.sleep(120);
+            } catch (InterruptedException ignored) {
                 task.isCancelled = true;
                 break;
             }
@@ -228,34 +346,21 @@ public class KiwigramDeleteHelper {
         }
 
         task.isCancelled = false;
-        AlertDialog deleteProgress = new AlertDialog(fragment.getParentActivity(), AlertDialog.ALERT_TYPE_LOADING);
-        deleteProgress.setTitle(LocaleController.getString(R.string.DeleteAllMyMessages));
-        deleteProgress.setMessage(LocaleController.getString(R.string.DeleteAllMyMessagesProgress) + "\n0 / " + totalTarget);
-        deleteProgress.setCanceledOnTouchOutside(false);
-        deleteProgress.setCancelable(true);
-        deleteProgress.setOnCancelListener(di -> task.isCancelled = true);
-        deleteProgress.setNegativeButton(LocaleController.getString(R.string.Cancel), (di, w) -> {
-            task.isCancelled = true;
-            try {
-                di.dismiss();
-            } catch (Exception ignored) {}
-        });
-
-        fragment.showDialog(deleteProgress);
-        task.activeDialog = deleteProgress;
+        createProgressDialog(fragment.getParentActivity(), task, "Deleting messages...", () -> task.isCancelled = true);
+        fragment.showDialog(task.activeDialog);
 
         Utilities.globalQueue.postRunnable(() -> {
-            int[] progress = new int[2]; // [0] = deleted, [1] = failed
-
-            deleteMessageIdBatches(task, fragment, currentAccount, dialogId, topicId, task.mainPeerMessageIds, progress, totalTarget);
+            ArrayList<Integer> mainList = new ArrayList<>(task.mainPeerMessageIds);
+            deleteMessageIdBatches(task, currentAccount, dialogId, topicId, mainList, totalTarget);
 
             if (!task.isCancelled && mergeDialogId != 0 && !task.mergedPeerMessageIds.isEmpty()) {
-                deleteMessageIdBatches(task, fragment, currentAccount, mergeDialogId, 0, task.mergedPeerMessageIds, progress, totalTarget);
+                ArrayList<Integer> mergedList = new ArrayList<>(task.mergedPeerMessageIds);
+                deleteMessageIdBatches(task, currentAccount, mergeDialogId, 0, mergedList, totalTarget);
             }
 
-            final int deleted = progress[0];
-            final int failed = progress[1];
-            final int remaining = totalTarget - deleted - failed;
+            final int deleted = task.deletedCount;
+            final int failed = task.failedCount;
+            final int remaining = Math.max(0, totalTarget - deleted - failed);
 
             AndroidUtilities.runOnUIThread(() -> {
                 if (task.activeDialog != null) {
@@ -266,7 +371,7 @@ public class KiwigramDeleteHelper {
                 }
 
                 if (fragment.getParentActivity() != null) {
-                    String summary = LocaleController.formatString("DeleteAllMessagesSummary", R.string.DeleteAllMessagesSummary, deleted, failed, remaining);
+                    String summary = String.format("Deletion completed.\nDeleted: %d\nFailed: %d\nRemaining: %d", deleted, failed, remaining);
                     AlertDialog.Builder resultBuilder = new AlertDialog.Builder(fragment.getParentActivity());
                     resultBuilder.setTitle(LocaleController.getString(R.string.DeleteAllMyMessages));
                     resultBuilder.setMessage(summary);
@@ -277,7 +382,7 @@ public class KiwigramDeleteHelper {
         });
     }
 
-    private static void deleteMessageIdBatches(TaskContext task, BaseFragment fragment, int currentAccount, long targetDialogId, int topicId, ArrayList<Integer> ids, int[] progress, int totalTarget) {
+    private static void deleteMessageIdBatches(TaskContext task, int currentAccount, long targetDialogId, int topicId, ArrayList<Integer> ids, int totalTarget) {
         if (ids == null || ids.isEmpty()) {
             return;
         }
@@ -363,34 +468,29 @@ public class KiwigramDeleteHelper {
                     i -= BATCH_SIZE;
                     continue;
                 } else {
-                    progress[1] += chunk.size();
+                    task.failedCount += chunk.size();
                     break;
                 }
             }
 
             if (requestSuccess[0]) {
-                // Server confirmed deletion!
-                progress[0] += chunk.size();
+                task.deletedCount += chunk.size();
 
                 // Synchronize Telegram's local storage and post UI notifications
                 AndroidUtilities.runOnUIThread(() -> {
                     MessagesStorage.getInstance(currentAccount).markMessagesAsDeleted(targetDialogId, chunk, true, true, 0, topicId);
                     MessagesStorage.getInstance(currentAccount).updateDialogsWithDeletedMessages(targetDialogId, channelId, chunk, null);
                     NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.messagesDeleted, chunk, channelId, false, false, false, 0);
-
-                    if (task.activeDialog != null && !task.isCancelled) {
-                        try {
-                            task.activeDialog.setMessage(LocaleController.getString(R.string.DeleteAllMyMessagesProgress) +
-                                "\n" + progress[0] + " / " + totalTarget);
-                        } catch (Exception ignored) {}
-                    }
                 });
             } else {
-                progress[1] += chunk.size();
+                task.failedCount += chunk.size();
             }
 
+            int percent = totalTarget > 0 ? (int) (((task.deletedCount + task.failedCount) * 100.0f) / totalTarget) : 0;
+            task.updateUi("Deleting messages (" + percent + "%)...", percent, totalTarget);
+
             try {
-                Thread.sleep(200);
+                Thread.sleep(150);
             } catch (InterruptedException ignored) {
                 task.isCancelled = true;
                 break;

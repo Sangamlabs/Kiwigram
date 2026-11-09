@@ -8,6 +8,8 @@
 
 package org.telegram.messenger.voip;
 
+import org.telegram.messenger.KiwigramConfig;
+
 import static org.telegram.messenger.MessagesController.findUpdates;
 import static org.telegram.messenger.MessagesController.findUpdatesAndRemove;
 
@@ -915,7 +917,7 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 
 		if (joinConference != null) {
 			final boolean mic = MessagesController.getGlobalMainSettings().getBoolean("callmiconstart", true);
-			if (!mic) {
+			if (!mic || KiwigramConfig.isVcAutoMute(currentAccount)) {
 				micMute = true;
 			} else {
 				if (!PermissionRequest.hasPermission(Manifest.permission.RECORD_AUDIO)) {
@@ -3047,13 +3049,15 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				for (int a = 0; a < uids.length; a++) {
 					if (uids[a] == 0) {
 						if (chat != null && lastTypingTimeSend < SystemClock.uptimeMillis() - 5000 && levels[a] > 0.1f && voice[a]) {
-							lastTypingTimeSend = SystemClock.uptimeMillis();
-							TLRPC.TL_messages_setTyping req = new TLRPC.TL_messages_setTyping();
-							req.action = new TLRPC.TL_speakingInGroupCallAction();
-							req.peer = MessagesController.getInputPeer(chat);
-							ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
+							if (!KiwigramConfig.isVcHideSpeaking(currentAccount)) {
+								lastTypingTimeSend = SystemClock.uptimeMillis();
+								TLRPC.TL_messages_setTyping req = new TLRPC.TL_messages_setTyping();
+								req.action = new TLRPC.TL_speakingInGroupCallAction();
+								req.peer = MessagesController.getInputPeer(chat);
+								ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
 
-							});
+								});
+							}
 						}
 						NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.webRtcMicAmplitudeEvent, levels[a]);
 						continue;
@@ -3793,6 +3797,9 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 	public void editCallMember(TLObject object, Boolean mute, Boolean muteVideo, Integer volume, Boolean raiseHand, Runnable onComplete) {
 		if (object == null || groupCall == null) {
 			return;
+		}
+		if (raiseHand != null && raiseHand && KiwigramConfig.isVcHideRaiseHand(currentAccount)) {
+			raiseHand = null;
 		}
 		TL_phone.editGroupCallParticipant req = new TL_phone.editGroupCallParticipant();
 		req.call = groupCall.getInputGroupCall();

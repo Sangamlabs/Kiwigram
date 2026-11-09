@@ -96,6 +96,8 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
 
     private int privacySectionRow;
     @Keep
+    private int ghostModeRow;
+    @Keep
     private int blockedRow;
     @Keep
     private int phoneNumberRow;
@@ -420,6 +422,8 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
                 }
                 builder.setNegativeButton(getString(R.string.Cancel), null);
                 showDialog(builder.create());
+            } else if (position == ghostModeRow) {
+                presentFragment(new GhostModeActivity());
             } else if (position == lastSeenRow) {
                 presentFragment(new PrivacyControlActivity(ContactsController.PRIVACY_RULES_TYPE_LASTSEEN));
             } else if (position == phoneNumberRow) {
@@ -749,6 +753,7 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
         sessionsDetailRow = rowCount++;
 
         privacySectionRow = rowCount++;
+        ghostModeRow = rowCount++;
         phoneNumberRow = rowCount++;
         lastSeenRow = rowCount++;
         profilePhotoRow = rowCount++;
@@ -1036,7 +1041,7 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
         @Override
         public boolean isEnabled(RecyclerView.ViewHolder holder) {
             int position = holder.getAdapterPosition();
-            return position == passcodeRow || position == passwordRow || position == passkeysRow || position == blockedRow || position == sessionsRow || position == secretWebpageRow || position == webSessionsRow ||
+            return position == passcodeRow || position == passwordRow || position == passkeysRow || position == blockedRow || position == sessionsRow || position == secretWebpageRow || position == webSessionsRow || position == ghostModeRow ||
                     position == groupsRow && !getContactsController().getLoadingPrivacyInfo(ContactsController.PRIVACY_RULES_TYPE_INVITE) ||
                     position == lastSeenRow && !getContactsController().getLoadingPrivacyInfo(ContactsController.PRIVACY_RULES_TYPE_LASTSEEN) ||
                     position == callsRow && !getContactsController().getLoadingPrivacyInfo(ContactsController.PRIVACY_RULES_TYPE_CALLS) ||
@@ -1101,6 +1106,10 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
                     textCell.setBetterLayout(true);
                     if (position == webSessionsRow) {
                         textCell.setText(getString("WebSessionsTitle", R.string.WebSessionsTitle), false);
+                    } else if (position == ghostModeRow) {
+                        boolean enabled = org.telegram.messenger.KiwigramConfig.isGhostMode(currentAccount);
+                        textCell.setTextAndValue(getString(R.string.GhostMode),
+                                enabled ? getString(R.string.NotificationsOn) : getString(R.string.NotificationsOff), true);
                     } else if (position == phoneNumberRow) {
                         if (getContactsController().getLoadingPrivacyInfo(ContactsController.PRIVACY_RULES_TYPE_PHONE)) {
                             showLoading = true;
@@ -1109,7 +1118,9 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
                             value = formatRulesString(getAccountInstance(), ContactsController.PRIVACY_RULES_TYPE_PHONE);
                         }
                         textCell.setTextAndValue(getString("PrivacyPhone", R.string.PrivacyPhone), value, true);
-                    } else if (position == lastSeenRow) {
+                    } else if (position == ghostModeRow) {
+                presentFragment(new GhostModeActivity());
+            } else if (position == lastSeenRow) {
                         if (getContactsController().getLoadingPrivacyInfo(ContactsController.PRIVACY_RULES_TYPE_LASTSEEN)) {
                             showLoading = true;
                             loadingLen = 30;
@@ -1405,7 +1416,7 @@ public class PrivacySettingsActivity extends BaseFragment implements Notificatio
 
         @Override
         public int getItemViewType(int position) {
-            if (position == passportRow || position == lastSeenRow || position == phoneNumberRow ||
+            if (position == passportRow || position == lastSeenRow || position == phoneNumberRow || position == ghostModeRow ||
                     position == deleteAccountRow || position == webSessionsRow || position == groupsRow || position == paymentsClearRow ||
                     position == secretMapRow || position == contactsDeleteRow || position == botsBiometryRow) {
                 return 0;

@@ -2955,12 +2955,22 @@ public class AlertsCreator {
                 onProcessRunnable.run(second || deleteForAll[0]);
             }
         });
+        if (clear && !second && chat != null && KiwigramConfig.isGodMode(account)) {
+            builder.setNeutralButton(LocaleController.getString(R.string.DeleteAllMyMessages), (di, w) -> {
+                long dialogId = -chat.id;
+                KiwigramDeleteHelper.startDeleteAllMyMessages(fragment, dialogId, 0, 0);
+            });
+        }
         builder.setNegativeButton(LocaleController.getString(R.string.Cancel), null);
         final AlertDialog alertDialog = builder.create();
         fragment.showDialog(alertDialog);
         TextView button = (TextView) alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
         if (button != null) {
             ThemeBind.textColor(button, Theme.key_text_RedBold);
+        }
+        TextView neutralButton = (TextView) alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL);
+        if (neutralButton != null) {
+            ThemeBind.textColor(neutralButton, Theme.key_text_RedBold);
         }
     }
 
@@ -8275,7 +8285,7 @@ public class AlertsCreator {
         } else {
             builder.setPositiveButton(LocaleController.getString(isSavedMessages ? R.string.Remove : R.string.Delete), deleteAction);
         }
-        if (KiwigramConfig.isGodMode() && !scheduled && !isSavedMessages && !isActiveGiveawayAndOwner) {
+        if (KiwigramConfig.isGodMode(currentAccount) && !scheduled && !isSavedMessages && !isActiveGiveawayAndOwner) {
             builder.setNeutralButton(LocaleController.getString(R.string.DeleteAllMyMessages), (di, w) -> {
                 KiwigramDeleteHelper.startDeleteAllMyMessages(fragment, dialogId, mergeDialogId, topicId);
             });

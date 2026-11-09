@@ -13336,26 +13336,26 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
 
         // Kiwigram Custom Features
-        io.addChecked(KiwigramConfig.isGhostMode(), R.drawable.msg_stories_stealth2, LocaleController.getString(R.string.GhostMode), () -> {
-            KiwigramConfig.toggleGhostMode();
+        io.addChecked(KiwigramConfig.isGhostMode(currentAccount), R.drawable.msg_stories_stealth2, LocaleController.getString(R.string.GhostMode), () -> {
+            KiwigramConfig.toggleGhostMode(currentAccount);
             if (activity != null) {
                 BulletinFactory.of(this).createSimpleBulletin(
                     activity.getResources().getDrawable(R.drawable.msg_stories_stealth2),
-                    LocaleController.getString(KiwigramConfig.isGhostMode() ? R.string.GhostModeEnabled : R.string.GhostModeDisabled)
+                    LocaleController.getString(KiwigramConfig.isGhostMode(currentAccount) ? R.string.GhostModeEnabled : R.string.GhostModeDisabled)
                 ).show();
             }
         });
-        io.addChecked(KiwigramConfig.isGodMode(), R.drawable.outline_shield_plain_24, LocaleController.getString(R.string.GodMode), () -> {
-            KiwigramConfig.toggleGodMode();
+        io.add(R.drawable.msg_voicechat, LocaleController.getString(R.string.VcGhost), () -> {
+            presentFragment(new VcGhostActivity());
+        });
+        io.addChecked(KiwigramConfig.isGodMode(currentAccount), R.drawable.outline_shield_plain_24, LocaleController.getString(R.string.GodMode), () -> {
+            KiwigramConfig.toggleGodMode(currentAccount);
             if (activity != null) {
                 BulletinFactory.of(this).createSimpleBulletin(
                     activity.getResources().getDrawable(R.drawable.outline_shield_plain_24),
-                    LocaleController.getString(KiwigramConfig.isGodMode() ? R.string.GodModeEnabled : R.string.GodModeDisabled)
+                    LocaleController.getString(KiwigramConfig.isGodMode(currentAccount) ? R.string.GodModeEnabled : R.string.GodModeDisabled)
                 ).show();
             }
-        });
-        io.add(R.drawable.msg_customize, LocaleController.getString(R.string.KiwigramPlus), () -> {
-            presentFragment(new KiwigramPlusActivity());
         });
         io.addGap();
 

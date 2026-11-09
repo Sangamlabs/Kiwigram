@@ -10554,7 +10554,7 @@ public class MessagesController extends BaseController implements NotificationCe
 
         if (getUserConfig().isClientActivated()) {
             if (!ignoreSetOnline && getConnectionsManager().getPauseTime() == 0 && ApplicationLoader.isScreenOn && !ApplicationLoader.mainInterfacePausedStageQueue) {
-                if (KiwigramConfig.isHideOnline()) {
+                if (KiwigramConfig.isOnlineGhost(currentAccount)) {
                     if (statusSettingState == 1 && statusRequest != 0) {
                         getConnectionsManager().cancelRequest(statusRequest, true);
                         statusRequest = 0;
@@ -11437,7 +11437,10 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     public boolean sendTyping(long dialogId, long threadMsgId, int action, String emojicon, int classGuid) {
-        if (KiwigramConfig.isHideTyping()) {
+        if (action == 0 && KiwigramConfig.isTypingGhost(currentAccount)) {
+            return false;
+        }
+        if ((action == 1 || action == 5 || action == 7 || action == 8 || action == 9) && KiwigramConfig.isRecordingGhost(currentAccount)) {
             return false;
         }
         if (action < 0 || action >= sendingTypings.length || dialogId == 0) {
@@ -14621,6 +14624,9 @@ public class MessagesController extends BaseController implements NotificationCe
     }
 
     private void completeReadTask(ReadTask task) {
+        if (KiwigramConfig.isSeenGhost(currentAccount)) {
+            return;
+        }
         if (task.replyId != 0 && task.monoForumPeerId == 0) {
             TLRPC.TL_messages_readDiscussion req = new TLRPC.TL_messages_readDiscussion();
             req.msg_id = (int) task.replyId;
@@ -21236,7 +21242,9 @@ public class MessagesController extends BaseController implements NotificationCe
                     if (arrayList == null) {
                         continue;
                     }
-                    getNotificationCenter().postNotificationName(NotificationCenter.messagesDeleted, arrayList, -dialogId, false);
+                    if (!KiwigramConfig.isPreserveDeletedMessages(currentAccount)) {
+                        getNotificationCenter().postNotificationName(NotificationCenter.messagesDeleted, arrayList, -dialogId, false);
+                    }
                     if (dialogId == 0) {
                         for (int b = 0, size2 = arrayList.size(); b < size2; b++) {
                             Integer id = arrayList.get(b);
@@ -21349,7 +21357,7 @@ public class MessagesController extends BaseController implements NotificationCe
                 getMessagesStorage().markMessagesContentAsRead(key, arrayList, currentTime2, markContentAsReadMessagesDate);
             }
         }
-        if (deletedMessages != null) {
+        if (deletedMessages != null && !KiwigramConfig.isPreserveDeletedMessages(currentAccount)) {
             for (int a = 0, size = deletedMessages.size(); a < size; a++) {
                 long key = deletedMessages.keyAt(a);
                 ArrayList<Integer> arrayList = deletedMessages.valueAt(a);

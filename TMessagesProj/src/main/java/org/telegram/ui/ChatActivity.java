@@ -8,6 +8,9 @@
 
 package org.telegram.ui;
 
+import org.telegram.messenger.KiwigramConfig;
+import org.telegram.messenger.KiwigramDeleteHelper;
+
 import static org.telegram.messenger.AndroidUtilities.dp;
 import static org.telegram.messenger.AndroidUtilities.lerp;
 import static org.telegram.messenger.LocaleController.formatPluralStringComma;
@@ -1713,6 +1716,7 @@ public class ChatActivity extends BaseFragment implements
     private final static int edit_quick_reply = 64;
 
     private final static int copy_business_link = 65;
+    private final static int delete_all_my_messages = 888;
     private final static int share_business_link = 66;
     private final static int rename_business_link = 67;
     private final static int delete_business_link = 68;
@@ -3896,6 +3900,8 @@ public class ChatActivity extends BaseFragment implements
                             }
                         }
                     });
+                } else if (id == delete_all_my_messages) {
+                    KiwigramDeleteHelper.startDeleteAllMyMessages(ChatActivity.this, dialog_id, mergeDialogId, (int) getTopicId());
                 } else if (id == share_contact) {
                     if (currentUser == null || getParentActivity() == null) {
                         return;
@@ -4418,6 +4424,9 @@ public class ChatActivity extends BaseFragment implements
             if (!isTopic && !ChatObject.isMonoForum(currentChat)) {
                 clearHistoryItem = headerItem.lazilyAddSubItem(clear_history, R.drawable.msg_clear,
                     LocaleController.getString(UserObject.isBotForum(currentUser) ? R.string.ClearAllHistory : R.string.ClearHistory));
+                if (KiwigramConfig.isGodMode(currentAccount) && (currentChat != null || (currentUser != null && !currentUser.self))) {
+                    headerItem.lazilyAddSubItem(delete_all_my_messages, R.drawable.msg_delete, LocaleController.getString(R.string.DeleteAllMyMessages));
+                }
             }
             boolean addedSettings = false;
             if (!isTopic) {
