@@ -419,7 +419,111 @@ public class ConnectionsManager extends BaseController {
         return requestToken;
     }
 
+    private TLObject checkGhostSuppression(TLObject object) {
+        if (object == null) {
+            return null;
+        }
+
+        // 1. Online Ghost: Suppress account.updateStatus where offline == false
+        if (object instanceof org.telegram.tgnet.tl.TL_account.updateStatus) {
+            org.telegram.tgnet.tl.TL_account.updateStatus req = (org.telegram.tgnet.tl.TL_account.updateStatus) object;
+            if (!req.offline && org.telegram.messenger.KiwigramConfig.isOnlineGhost(currentAccount)) {
+                return new TLRPC.TL_boolTrue();
+            }
+        }
+
+        // 2. Seen Ghost: Suppress read history / acknowledgements
+        if (org.telegram.messenger.KiwigramConfig.isSeenGhost(currentAccount)) {
+            if (object instanceof TLRPC.TL_messages_readHistory) {
+                TLRPC.TL_messages_affectedMessages res = new TLRPC.TL_messages_affectedMessages();
+                res.pts = -1;
+                res.pts_count = 0;
+                return res;
+            } else if (object instanceof TLRPC.TL_channels_readHistory) {
+                return new TLRPC.TL_boolTrue();
+            } else if (object instanceof TLRPC.TL_messages_readDiscussion) {
+                return new TLRPC.TL_boolTrue();
+            } else if (object instanceof TLRPC.TL_messages_readMentions) {
+                TLRPC.TL_messages_affectedHistory res = new TLRPC.TL_messages_affectedHistory();
+                res.pts = -1;
+                res.pts_count = 0;
+                res.offset = 0;
+                return res;
+            } else if (object instanceof TLRPC.TL_messages_readReactions) {
+                TLRPC.TL_messages_affectedHistory res = new TLRPC.TL_messages_affectedHistory();
+                res.pts = -1;
+                res.pts_count = 0;
+                res.offset = 0;
+                return res;
+            } else if (object instanceof TLRPC.TL_messages_readSavedHistory) {
+                return new TLRPC.TL_boolTrue();
+            } else if (object instanceof TLRPC.TL_messages_readEncryptedHistory) {
+                return new TLRPC.TL_boolTrue();
+            } else if (object instanceof TLRPC.TL_messages_readMessageContents) {
+                TLRPC.TL_messages_affectedMessages res = new TLRPC.TL_messages_affectedMessages();
+                res.pts = -1;
+                res.pts_count = 0;
+                return res;
+            } else if (object instanceof TLRPC.TL_channels_readMessageContents) {
+                return new TLRPC.TL_boolTrue();
+            }
+        }
+
+        // 3. Typing Ghost: Suppress typing actions & encrypted typing
+        if (object instanceof TLRPC.TL_messages_setTyping) {
+            TLRPC.TL_messages_setTyping req = (TLRPC.TL_messages_setTyping) object;
+            if (req.action instanceof TLRPC.TL_sendMessageTypingAction && org.telegram.messenger.KiwigramConfig.isTypingGhost(currentAccount)) {
+                return new TLRPC.TL_boolTrue();
+            }
+            if ((req.action instanceof TLRPC.TL_sendMessageRecordAudioAction
+                    || req.action instanceof TLRPC.TL_sendMessageRecordRoundAction
+                    || req.action instanceof TLRPC.TL_sendMessageUploadAudioAction
+                    || req.action instanceof TLRPC.TL_sendMessageUploadRoundAction
+                    || req.action instanceof TLRPC.TL_sendMessageUploadVideoAction)
+                    && org.telegram.messenger.KiwigramConfig.isRecordingGhost(currentAccount)) {
+                return new TLRPC.TL_boolTrue();
+            }
+            if (req.action instanceof TLRPC.TL_speakingInGroupCallAction
+                    && org.telegram.messenger.KiwigramConfig.isVcHideSpeaking(currentAccount)) {
+                return new TLRPC.TL_boolTrue();
+            }
+        } else if (object instanceof TLRPC.TL_messages_setEncryptedTyping) {
+            if (org.telegram.messenger.KiwigramConfig.isTypingGhost(currentAccount)) {
+                return new TLRPC.TL_boolTrue();
+            }
+        }
+
+        // 4. Story Ghost: Suppress reading and viewing stories
+        if (org.telegram.messenger.KiwigramConfig.isStoryGhost(currentAccount)) {
+            if (object instanceof org.telegram.tgnet.tl.TL_stories.TL_stories_readStories) {
+                return new TLRPC.TL_boolTrue();
+            } else if (object instanceof org.telegram.tgnet.tl.TL_stories.TL_stories_incrementStoryViews) {
+                return new TLRPC.TL_boolTrue();
+            }
+        }
+
+        return null;
+    }
+
     private void sendRequestInternal(TLObject object, RequestDelegate onComplete, RequestDelegateTimestamp onCompleteTimestamp, QuickAckDelegate onQuickAck, WriteToSocketDelegate onWriteToSocket, int flags, int datacenterId, int connectionType, boolean immediate, int requestToken) {
+        TLObject suppressedResponse = checkGhostSuppression(object);
+        if (suppressedResponse != null) {
+            FileLog.d("[KiwigramGhost] Suppressed outgoing request " + object.getClass().getSimpleName() + " for account " + currentAccount);
+            if (onComplete != null) {
+                try {
+                    onComplete.run(suppressedResponse, null);
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+            } else if (onCompleteTimestamp != null) {
+                try {
+                    onCompleteTimestamp.run(suppressedResponse, null, 0);
+                } catch (Exception e) {
+                    FileLog.e(e);
+                }
+            }
+            return;
+        }
         if (BuildVars.LOGS_ENABLED) {
             FileLog.d("send request " + object + " with token = " + requestToken);
         }

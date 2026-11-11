@@ -1347,6 +1347,8 @@ public class StoriesController {
                 req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
                 req.max_id = storyItem.id;
                 ConnectionsManager.getInstance(currentAccount).sendRequest(req, null);
+            } else {
+                FileLog.d("[KiwigramGhost] Suppressed story read report for account " + currentAccount + ", max_id=" + storyItem.id);
             }
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.storiesReadUpdated);
             return true;
@@ -3772,10 +3774,14 @@ public class StoriesController {
             if (seenStories.contains(storyId)) return false;
             seenStories.add(storyId);
             saveCache();
-            TL_stories.TL_stories_incrementStoryViews req = new TL_stories.TL_stories_incrementStoryViews();
-            req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
-            req.id.add(storyId);
-            ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {});
+            if (!org.telegram.messenger.KiwigramConfig.isStoryGhost(currentAccount)) {
+                TL_stories.TL_stories_incrementStoryViews req = new TL_stories.TL_stories_incrementStoryViews();
+                req.peer = MessagesController.getInstance(currentAccount).getInputPeer(dialogId);
+                req.id.add(storyId);
+                ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {});
+            } else {
+                FileLog.d("[KiwigramGhost] Suppressed story view increment for account " + currentAccount + ", storyId=" + storyId);
+            }
             NotificationCenter.getInstance(currentAccount).postNotificationName(NotificationCenter.storiesReadUpdated);
             return true;
         }

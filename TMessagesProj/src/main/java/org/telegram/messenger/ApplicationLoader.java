@@ -246,6 +246,7 @@ public class ApplicationLoader extends Application {
             e.printStackTrace();
         }
 
+        KiwigramConfig.loadConfig();
         SharedConfig.loadConfig();
         SharedPrefsHelper.init(applicationContext);
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) { //TODO improve account

@@ -119,40 +119,27 @@ public class GhostModeActivity extends BaseFragment implements NotificationCente
         listView.setOnItemClickListener((view, position) -> {
             if (position == masterGhostRow) {
                 KiwigramConfig.toggleGhostMode(currentAccount);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(KiwigramConfig.isGhostMode(currentAccount));
-                }
                 listAdapter.notifyDataSetChanged();
             } else if (position == seenGhostRow) {
                 boolean current = KiwigramConfig.getRawSeenGhost(currentAccount);
                 KiwigramConfig.setSeenGhost(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == onlineGhostRow) {
                 boolean current = KiwigramConfig.getRawOnlineGhost(currentAccount);
                 KiwigramConfig.setOnlineGhost(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == typingGhostRow) {
                 boolean current = KiwigramConfig.getRawTypingGhost(currentAccount);
                 KiwigramConfig.setTypingGhost(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == recordingGhostRow) {
                 boolean current = KiwigramConfig.getRawRecordingGhost(currentAccount);
                 KiwigramConfig.setRecordingGhost(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == storyGhostRow) {
                 boolean current = KiwigramConfig.getRawStoryGhost(currentAccount);
                 KiwigramConfig.setStoryGhost(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == vcGhostSubmenuRow) {
                 presentFragment(new VcGhostActivity());
             }
@@ -257,18 +244,31 @@ public class GhostModeActivity extends BaseFragment implements NotificationCente
 
                 case TYPE_CHECK:
                     TextCheckCell checkCell = (TextCheckCell) holder.itemView;
+                    boolean master = KiwigramConfig.isGhostMode(currentAccount);
                     if (position == masterGhostRow) {
-                        checkCell.setTextAndCheck(LocaleController.getString(R.string.GhostMode), KiwigramConfig.isGhostMode(currentAccount), false);
+                        checkCell.setTextAndValueAndCheck(LocaleController.getString(R.string.GhostMode),
+                                master ? "Enabled: Active privacy protections running" : "Disabled: All Ghost protections stopped",
+                                master, false, false);
                     } else if (position == seenGhostRow) {
-                        checkCell.setTextAndCheck(LocaleController.getString(R.string.SeenGhost), KiwigramConfig.getRawSeenGhost(currentAccount), true);
+                        boolean raw = KiwigramConfig.getRawSeenGhost(currentAccount);
+                        String status = !master ? "Inactive (Master Ghost Mode is OFF)" : (raw ? "Active: Stealth read enabled" : "Disabled");
+                        checkCell.setTextAndValueAndCheck(LocaleController.getString(R.string.SeenGhost), status, raw, false, true);
                     } else if (position == onlineGhostRow) {
-                        checkCell.setTextAndCheck(LocaleController.getString(R.string.OnlineGhost), KiwigramConfig.getRawOnlineGhost(currentAccount), true);
+                        boolean raw = KiwigramConfig.getRawOnlineGhost(currentAccount);
+                        String status = !master ? "Inactive (Master Ghost Mode is OFF)" : (raw ? "Active: Online presence hidden" : "Disabled");
+                        checkCell.setTextAndValueAndCheck(LocaleController.getString(R.string.OnlineGhost), status, raw, false, true);
                     } else if (position == typingGhostRow) {
-                        checkCell.setTextAndCheck(LocaleController.getString(R.string.TypingGhost), KiwigramConfig.getRawTypingGhost(currentAccount), true);
+                        boolean raw = KiwigramConfig.getRawTypingGhost(currentAccount);
+                        String status = !master ? "Inactive (Master Ghost Mode is OFF)" : (raw ? "Active: Typing indicators suppressed" : "Disabled");
+                        checkCell.setTextAndValueAndCheck(LocaleController.getString(R.string.TypingGhost), status, raw, false, true);
                     } else if (position == recordingGhostRow) {
-                        checkCell.setTextAndCheck(LocaleController.getString(R.string.RecordingGhost), KiwigramConfig.getRawRecordingGhost(currentAccount), true);
+                        boolean raw = KiwigramConfig.getRawRecordingGhost(currentAccount);
+                        String status = !master ? "Inactive (Master Ghost Mode is OFF)" : (raw ? "Active: Voice/video recording hidden" : "Disabled");
+                        checkCell.setTextAndValueAndCheck(LocaleController.getString(R.string.RecordingGhost), status, raw, false, true);
                     } else if (position == storyGhostRow) {
-                        checkCell.setTextAndCheck(LocaleController.getString(R.string.StoryGhost), KiwigramConfig.getRawStoryGhost(currentAccount), false);
+                        boolean raw = KiwigramConfig.getRawStoryGhost(currentAccount);
+                        String status = !master ? "Inactive (Master Ghost Mode is OFF)" : (raw ? "Active: Stealth story views" : "Disabled");
+                        checkCell.setTextAndValueAndCheck(LocaleController.getString(R.string.StoryGhost), status, raw, false, false);
                     }
                     break;
 

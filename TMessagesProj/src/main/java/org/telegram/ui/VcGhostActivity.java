@@ -46,6 +46,10 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
     private int mtprotoStatusRow;
     private int mtprotoDetailRow;
 
+    private int channelHeaderRow;
+    private int channelJoinAsRow;
+    private int channelDetailRow;
+
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_CHECK = 1;
     private static final int TYPE_DETAIL = 2;
@@ -55,6 +59,9 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
     public boolean onFragmentCreate() {
         super.onFragmentCreate();
         NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.mainUserInfoChanged);
+        NotificationCenter.getInstance(currentAccount).addObserver(this, NotificationCenter.groupCallUpdated);
+        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.didStartedCall);
+        NotificationCenter.getGlobalInstance().addObserver(this, NotificationCenter.didEndCall);
         updateRows();
         return true;
     }
@@ -63,6 +70,9 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
     public void onFragmentDestroy() {
         super.onFragmentDestroy();
         NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.mainUserInfoChanged);
+        NotificationCenter.getInstance(currentAccount).removeObserver(this, NotificationCenter.groupCallUpdated);
+        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.didStartedCall);
+        NotificationCenter.getGlobalInstance().removeObserver(this, NotificationCenter.didEndCall);
     }
 
     private void updateRows() {
@@ -79,6 +89,10 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
         mtprotoHeaderRow = rowCount++;
         mtprotoStatusRow = rowCount++;
         mtprotoDetailRow = rowCount++;
+
+        channelHeaderRow = rowCount++;
+        channelJoinAsRow = rowCount++;
+        channelDetailRow = rowCount++;
     }
 
     @Override
@@ -111,32 +125,30 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
             if (position == invisibleListenerRow) {
                 boolean current = KiwigramConfig.isVcInvisibleListener(currentAccount);
                 KiwigramConfig.setVcInvisibleListener(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == autoMuteRow) {
                 boolean current = KiwigramConfig.isVcAutoMute(currentAccount);
                 KiwigramConfig.setVcAutoMute(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == receiveAudioRow) {
                 boolean current = KiwigramConfig.isVcReceiveAudio(currentAccount);
                 KiwigramConfig.setVcReceiveAudio(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == hideRaiseHandRow) {
                 boolean current = KiwigramConfig.isVcHideRaiseHand(currentAccount);
                 KiwigramConfig.setVcHideRaiseHand(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
-                }
+                listAdapter.notifyDataSetChanged();
             } else if (position == hideSpeakingRow) {
                 boolean current = KiwigramConfig.isVcHideSpeaking(currentAccount);
                 KiwigramConfig.setVcHideSpeaking(currentAccount, !current);
-                if (view instanceof TextCheckCell) {
-                    ((TextCheckCell) view).setChecked(!current);
+                listAdapter.notifyDataSetChanged();
+            } else if (position == channelJoinAsRow) {
+                if (getParentActivity() != null) {
+                    new org.telegram.ui.ActionBar.AlertDialog.Builder(getParentActivity())
+                            .setTitle(LocaleController.getString(R.string.VcJoinAsChannelTitle))
+                            .setMessage("In Telegram MTProto, users who own or manage public/private channels can join voice chats as that channel. This conceals your personal account profile, replacing it with the channel identity.\n\nTo use this feature:\n1. Open any group or channel voice chat.\n2. When prompted, or via the call settings, select your channel under 'Display me as...'.\n\nNote: The chosen channel identity will still appear in the participant list.")
+                            .setPositiveButton(LocaleController.getString(R.string.OK), null)
+                            .show();
                 }
             }
         });
@@ -146,7 +158,7 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
 
     @Override
     public void didReceivedNotification(int id, int account, Object... args) {
-        if (id == NotificationCenter.mainUserInfoChanged && account == currentAccount) {
+        if (id == NotificationCenter.groupCallUpdated || id == NotificationCenter.didStartedCall || id == NotificationCenter.didEndCall || (id == NotificationCenter.mainUserInfoChanged && account == currentAccount)) {
             if (listAdapter != null) {
                 listAdapter.notifyDataSetChanged();
             }
@@ -181,17 +193,18 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
                     || position == autoMuteRow
                     || position == receiveAudioRow
                     || position == hideRaiseHandRow
-                    || position == hideSpeakingRow;
+                    || position == hideSpeakingRow
+                    || position == channelJoinAsRow;
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (position == vcHeaderRow || position == mtprotoHeaderRow) {
+            if (position == vcHeaderRow || position == mtprotoHeaderRow || position == channelHeaderRow) {
                 return TYPE_HEADER;
             } else if (position == invisibleListenerRow || position == autoMuteRow || position == receiveAudioRow
                     || position == hideRaiseHandRow || position == hideSpeakingRow) {
                 return TYPE_CHECK;
-            } else if (position == mtprotoStatusRow) {
+            } else if (position == mtprotoStatusRow || position == channelJoinAsRow) {
                 return TYPE_DETAIL;
             } else {
                 return TYPE_INFO;
@@ -231,6 +244,8 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
                         headerCell.setText(LocaleController.getString(R.string.VcGhost));
                     } else if (position == mtprotoHeaderRow) {
                         headerCell.setText(LocaleController.getString(R.string.VcCompatibilityNotice));
+                    } else if (position == channelHeaderRow) {
+                        headerCell.setText(LocaleController.getString(R.string.VcJoinAsChannelTitle));
                     }
                     break;
 
@@ -256,14 +271,17 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
                         org.telegram.tgnet.TLRPC.GroupCall activeCall = service != null ? service.getGroupCall() : null;
                         if (activeCall != null && activeCall.listeners_hidden) {
                             detailCell.setTextAndValue(LocaleController.getString(R.string.VcCompatibilityActive),
-                                    "Call administrator has enabled hidden listeners. Your account identity is concealed on the server.", false);
+                                    "Server capability: Call administrator has enabled hidden listeners. Your account identity is concealed on the server.", false);
                         } else if (activeCall != null) {
                             detailCell.setTextAndValue("Visible to Participants",
-                                    "The current voice chat administrator has not hidden listeners. Telegram MTProto registers listeners server-side. Auto-mute and stealth speaking suppression remain active.", false);
+                                    LocaleController.getString(R.string.VcCompatibilityUnsupported), false);
                         } else {
                             detailCell.setTextAndValue("Protocol Architecture",
-                                    "In Telegram MTProto, listener lists are hidden only when group/channel administrators enable groupCall.listeners_hidden. Kiwigram enforces auto-mute, suppresses speaking indicators, and avoids raise-hand actions.", false);
+                                    "In Telegram MTProto, listener lists are hidden only when group/channel administrators enable groupCall.listeners_hidden. When joining calls without this setting, Kiwigram displays honest visibility and enforces auto-mute and stealth audio reception.", false);
                         }
+                    } else if (position == channelJoinAsRow) {
+                        detailCell.setTextAndValue(LocaleController.getString(R.string.VcJoinAsChannelTitle),
+                                "Join voice chat using an owned or managed channel", false);
                     }
                     break;
 
@@ -273,6 +291,8 @@ public class VcGhostActivity extends BaseFragment implements NotificationCenter.
                         infoCell.setText(LocaleController.getString(R.string.VcInvisibleListenerDetail));
                     } else if (position == mtprotoDetailRow) {
                         infoCell.setText(LocaleController.getString(R.string.VcCompatibilityNoticeDetail));
+                    } else if (position == channelDetailRow) {
+                        infoCell.setText(LocaleController.getString(R.string.VcJoinAsChannelDetail));
                     }
                     break;
             }

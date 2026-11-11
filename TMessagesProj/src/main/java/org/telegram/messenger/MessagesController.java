@@ -10567,6 +10567,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         }
                         TL_account.updateStatus req = new TL_account.updateStatus();
                         req.offline = true;
+                        FileLog.d("[KiwigramGhost] Online Ghost: sending explicit offline status for account " + currentAccount);
                         statusRequest = getConnectionsManager().sendRequest(req, (response, error) -> {
                             if (error == null) {
                                 offlineSent = true;
@@ -10579,7 +10580,7 @@ public class MessagesController extends BaseController implements NotificationCe
                             statusRequest = 0;
                         });
                     }
-                } else if (ApplicationLoader.mainInterfacePausedStageQueueTime != 0 && Math.abs(ApplicationLoader.mainInterfacePausedStageQueueTime - System.currentTimeMillis()) > 1000) {
+                } else if (ApplicationLoader.mainInterfacePausedStageQueueTime == 0 || Math.abs(ApplicationLoader.mainInterfacePausedStageQueueTime - System.currentTimeMillis()) > 1000) {
                     if (statusSettingState != 1 && (lastStatusUpdateTime == 0 || Math.abs(System.currentTimeMillis() - lastStatusUpdateTime) >= 55000 || offlineSent)) {
                         statusSettingState = 1;
 
@@ -11438,9 +11439,11 @@ public class MessagesController extends BaseController implements NotificationCe
 
     public boolean sendTyping(long dialogId, long threadMsgId, int action, String emojicon, int classGuid) {
         if (action == 0 && KiwigramConfig.isTypingGhost(currentAccount)) {
+            FileLog.d("[KiwigramGhost] Suppressed typing action for dialog " + dialogId + ", account=" + currentAccount);
             return false;
         }
         if ((action == 1 || action == 5 || action == 7 || action == 8 || action == 9) && KiwigramConfig.isRecordingGhost(currentAccount)) {
+            FileLog.d("[KiwigramGhost] Suppressed recording/upload action (" + action + ") for dialog " + dialogId + ", account=" + currentAccount);
             return false;
         }
         if (action < 0 || action >= sendingTypings.length || dialogId == 0) {
@@ -14610,6 +14613,10 @@ public class MessagesController extends BaseController implements NotificationCe
         if (!DialogObject.isEncryptedDialog(dialogId)) {
             return;
         }
+        if (KiwigramConfig.isSeenGhost(currentAccount)) {
+            FileLog.d("[KiwigramGhost] Suppressed secret chat read for dialog " + dialogId + ", account=" + currentAccount);
+            return;
+        }
         TLRPC.EncryptedChat chat = getEncryptedChat(DialogObject.getEncryptedChatId(dialogId));
         if (chat == null) {
             return;
@@ -14625,6 +14632,7 @@ public class MessagesController extends BaseController implements NotificationCe
 
     private void completeReadTask(ReadTask task) {
         if (KiwigramConfig.isSeenGhost(currentAccount)) {
+            FileLog.d("[KiwigramGhost] Suppressed completeReadTask for dialog " + task.dialogId + ", maxId=" + task.maxId + ", account=" + currentAccount);
             return;
         }
         if (task.replyId != 0 && task.monoForumPeerId == 0) {
@@ -14733,6 +14741,10 @@ public class MessagesController extends BaseController implements NotificationCe
             return;
         }
         getMessagesStorage().resetMentionsCount(dialogId, topicId, 0);
+        if (KiwigramConfig.isSeenGhost(currentAccount)) {
+            FileLog.d("[KiwigramGhost] Suppressed markMentionsAsRead for dialog " + dialogId + ", account=" + currentAccount);
+            return;
+        }
         TLRPC.TL_messages_readMentions req = new TLRPC.TL_messages_readMentions();
         req.peer = getInputPeer(dialogId);
         if (topicId != 0) {

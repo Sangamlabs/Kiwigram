@@ -97,6 +97,7 @@ import org.telegram.messenger.AndroidUtilities;
 import org.telegram.messenger.BotWebViewVibrationEffect;
 import org.telegram.messenger.BuildVars;
 import org.telegram.messenger.ChatObject;
+import org.telegram.messenger.KiwigramConfig;
 import org.telegram.messenger.DialogObject;
 import org.telegram.messenger.DispatchQueue;
 import org.telegram.messenger.Emoji;
@@ -6295,6 +6296,23 @@ public class GroupCallActivity extends BottomSheet implements NotificationCenter
             return;
         }
         callInitied = true;
+        if (KiwigramConfig.isVcInvisibleListener(accountInstance.getCurrentAccount())) {
+            boolean listenersHidden = call != null && call.call != null && call.call.listeners_hidden;
+            FileLog.d("[KiwigramGhost] GroupCallActivity joined: listeners_hidden=" + listenersHidden);
+            if (!listenersHidden) {
+                AndroidUtilities.runOnUIThread(() -> {
+                    if (topBulletinContainer != null && getContext() != null) {
+                        try {
+                            BulletinFactory.of(topBulletinContainer, new DarkBlueThemeResourcesProvider())
+                                    .createSimpleBulletin(R.drawable.msg_info, LocaleController.getString(R.string.VcCompatibilityUnsupported))
+                                    .show(isBulletinTop());
+                        } catch (Exception e) {
+                            FileLog.e(e);
+                        }
+                    }
+                }, 1000);
+            }
+        }
         oldParticipants.addAll(call.visibleParticipants);
         oldVideoParticipants.addAll(visibleVideoParticipants);
         oldInvited.addAll(call.invitedUsers);

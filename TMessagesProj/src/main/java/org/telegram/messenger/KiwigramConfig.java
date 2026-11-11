@@ -69,6 +69,12 @@ public class KiwigramConfig {
         return account;
     }
 
+    public static void checkConfigLoaded() {
+        if (!configLoaded) {
+            loadConfig();
+        }
+    }
+
     public static void loadConfig() {
         synchronized (sync) {
             if (configLoaded) {
@@ -175,7 +181,40 @@ public class KiwigramConfig {
     // Ghost Mode (Master & Modular)
     // ==========================================
 
+    public static void logGhostState(int account) {
+        int acc = sanitizeAccount(account);
+        String msg = "[KiwigramGhost] Effective Ghost State for account " + acc + ": "
+                + "master=" + isGhostMode(acc)
+                + ", seen=" + isSeenGhost(acc) + " (raw=" + getRawSeenGhost(acc) + ")"
+                + ", online=" + isOnlineGhost(acc) + " (raw=" + getRawOnlineGhost(acc) + ")"
+                + ", typing=" + isTypingGhost(acc) + " (raw=" + getRawTypingGhost(acc) + ")"
+                + ", recording=" + isRecordingGhost(acc) + " (raw=" + getRawRecordingGhost(acc) + ")"
+                + ", story=" + isStoryGhost(acc) + " (raw=" + getRawStoryGhost(acc) + ")"
+                + ", vcInvisible=" + isVcInvisibleListener(acc)
+                + ", vcAutoMute=" + isVcAutoMute(acc)
+                + ", vcReceiveAudio=" + isVcReceiveAudio(acc)
+                + ", vcHideRaiseHand=" + isVcHideRaiseHand(acc)
+                + ", vcHideSpeaking=" + isVcHideSpeaking(acc);
+        if (BuildVars.LOGS_ENABLED) {
+            try {
+                FileLog.d(msg);
+            } catch (Throwable t) {
+                System.out.println(msg);
+            }
+        }
+    }
+
+    private static void notifyStateChanged(int acc) {
+        if (ApplicationLoader.applicationContext != null) {
+            try {
+                NotificationCenter.getInstance(acc).postNotificationName(NotificationCenter.mainUserInfoChanged);
+            } catch (Throwable ignore) {
+            }
+        }
+    }
+
     public static boolean isGhostMode(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return ghostMode[acc];
@@ -187,16 +226,23 @@ public class KiwigramConfig {
     }
 
     public static void setGhostMode(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             ghostMode[acc] = enabled;
         }
         saveConfig();
-        if (UserConfig.getInstance(acc).isClientActivated()) {
-            Utilities.stageQueue.postRunnable(() -> {
-                MessagesController.getInstance(acc).updateTimerProc();
-            });
-            NotificationCenter.getInstance(acc).postNotificationName(NotificationCenter.mainUserInfoChanged);
+        logGhostState(acc);
+        if (ApplicationLoader.applicationContext != null) {
+            try {
+                if (UserConfig.getInstance(acc).isClientActivated()) {
+                    Utilities.stageQueue.postRunnable(() -> {
+                        MessagesController.getInstance(acc).updateTimerProc();
+                    });
+                    NotificationCenter.getInstance(acc).postNotificationName(NotificationCenter.mainUserInfoChanged);
+                }
+            } catch (Throwable ignore) {
+            }
         }
     }
 
@@ -213,6 +259,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isSeenGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return ghostMode[acc] && seenGhost[acc];
@@ -228,11 +275,14 @@ public class KiwigramConfig {
     }
 
     public static void setSeenGhost(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             seenGhost[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setSeenGhost(boolean enabled) {
@@ -240,6 +290,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isOnlineGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return ghostMode[acc] && onlineGhost[acc];
@@ -255,16 +306,23 @@ public class KiwigramConfig {
     }
 
     public static void setOnlineGhost(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             onlineGhost[acc] = enabled;
         }
         saveConfig();
-        if (UserConfig.getInstance(acc).isClientActivated()) {
-            Utilities.stageQueue.postRunnable(() -> {
-                MessagesController.getInstance(acc).updateTimerProc();
-            });
-            NotificationCenter.getInstance(acc).postNotificationName(NotificationCenter.mainUserInfoChanged);
+        logGhostState(acc);
+        if (ApplicationLoader.applicationContext != null) {
+            try {
+                if (UserConfig.getInstance(acc).isClientActivated()) {
+                    Utilities.stageQueue.postRunnable(() -> {
+                        MessagesController.getInstance(acc).updateTimerProc();
+                    });
+                    NotificationCenter.getInstance(acc).postNotificationName(NotificationCenter.mainUserInfoChanged);
+                }
+            } catch (Throwable ignore) {
+            }
         }
     }
 
@@ -273,6 +331,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isTypingGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return ghostMode[acc] && typingGhost[acc];
@@ -288,11 +347,14 @@ public class KiwigramConfig {
     }
 
     public static void setTypingGhost(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             typingGhost[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setTypingGhost(boolean enabled) {
@@ -300,6 +362,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isRecordingGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return ghostMode[acc] && recordingGhost[acc];
@@ -311,11 +374,14 @@ public class KiwigramConfig {
     }
 
     public static void setRecordingGhost(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             recordingGhost[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setRecordingGhost(boolean enabled) {
@@ -323,6 +389,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isStoryGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return ghostMode[acc] && storyGhost[acc];
@@ -338,11 +405,14 @@ public class KiwigramConfig {
     }
 
     public static void setStoryGhost(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             storyGhost[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setStoryGhost(boolean enabled) {
@@ -351,6 +421,7 @@ public class KiwigramConfig {
 
     // Direct toggle getters (returns raw toggle position regardless of master toggle)
     public static boolean getRawSeenGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return seenGhost[acc];
@@ -358,6 +429,7 @@ public class KiwigramConfig {
     }
 
     public static boolean getRawOnlineGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return onlineGhost[acc];
@@ -365,6 +437,7 @@ public class KiwigramConfig {
     }
 
     public static boolean getRawTypingGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return typingGhost[acc];
@@ -372,6 +445,7 @@ public class KiwigramConfig {
     }
 
     public static boolean getRawRecordingGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return recordingGhost[acc];
@@ -379,6 +453,7 @@ public class KiwigramConfig {
     }
 
     public static boolean getRawStoryGhost(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return storyGhost[acc];
@@ -390,6 +465,7 @@ public class KiwigramConfig {
     // ==========================================
 
     public static boolean isVcInvisibleListener(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return vcInvisibleListener[acc];
@@ -401,11 +477,14 @@ public class KiwigramConfig {
     }
 
     public static void setVcInvisibleListener(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             vcInvisibleListener[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setVcInvisibleListener(boolean enabled) {
@@ -421,6 +500,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isVcAutoMute(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return vcAutoMute[acc];
@@ -432,11 +512,14 @@ public class KiwigramConfig {
     }
 
     public static void setVcAutoMute(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             vcAutoMute[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setVcAutoMute(boolean enabled) {
@@ -444,6 +527,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isVcReceiveAudio(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return vcReceiveAudio[acc];
@@ -455,11 +539,14 @@ public class KiwigramConfig {
     }
 
     public static void setVcReceiveAudio(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             vcReceiveAudio[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setVcReceiveAudio(boolean enabled) {
@@ -467,6 +554,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isVcHideRaiseHand(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return vcHideRaiseHand[acc];
@@ -478,11 +566,14 @@ public class KiwigramConfig {
     }
 
     public static void setVcHideRaiseHand(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             vcHideRaiseHand[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setVcHideRaiseHand(boolean enabled) {
@@ -490,6 +581,7 @@ public class KiwigramConfig {
     }
 
     public static boolean isVcHideSpeaking(int account) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             return vcHideSpeaking[acc];
@@ -501,11 +593,14 @@ public class KiwigramConfig {
     }
 
     public static void setVcHideSpeaking(int account, boolean enabled) {
+        checkConfigLoaded();
         int acc = sanitizeAccount(account);
         synchronized (sync) {
             vcHideSpeaking[acc] = enabled;
         }
         saveConfig();
+        logGhostState(acc);
+        notifyStateChanged(acc);
     }
 
     public static void setVcHideSpeaking(boolean enabled) {
@@ -533,8 +628,13 @@ public class KiwigramConfig {
             godMode[acc] = enabled;
         }
         saveConfig();
-        if (UserConfig.getInstance(acc).isClientActivated()) {
-            NotificationCenter.getInstance(acc).postNotificationName(NotificationCenter.mainUserInfoChanged);
+        if (ApplicationLoader.applicationContext != null) {
+            try {
+                if (UserConfig.getInstance(acc).isClientActivated()) {
+                    NotificationCenter.getInstance(acc).postNotificationName(NotificationCenter.mainUserInfoChanged);
+                }
+            } catch (Throwable ignore) {
+            }
         }
     }
 

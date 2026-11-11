@@ -2122,7 +2122,12 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 				FileLog.d("initital source = " + ssrc);
 			}
 			final TL_phone.joinGroupCall req = new TL_phone.joinGroupCall();
+			if (KiwigramConfig.isVcAutoMute(currentAccount)) {
+				micMute = true;
+			}
 			req.muted = micMute;
+			boolean listenersHidden = groupCall != null && groupCall.call != null && groupCall.call.listeners_hidden;
+			FileLog.d("[KiwigramGhost] joinGroupCall (account " + currentAccount + "): muted=" + req.muted + ", listeners_hidden=" + listenersHidden);
 			req.video_stopped = videoState[CAPTURE_DEVICE_CAMERA] != Instance.VIDEO_STATE_ACTIVE;
 			req.call = groupCall.getInputGroupCall();
 			req.params = new TLRPC.TL_dataJSON();
@@ -2418,7 +2423,12 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			}
 			final Runnable join = () -> {
 				final TL_phone.joinGroupCall req = new TL_phone.joinGroupCall();
+				if (KiwigramConfig.isVcAutoMute(currentAccount)) {
+					micMute = true;
+				}
 				req.muted = micMute;
+				boolean listenersHidden = groupCall != null && groupCall.call != null && groupCall.call.listeners_hidden;
+				FileLog.d("[KiwigramGhost] joinGroupCall (account " + currentAccount + "): muted=" + req.muted + ", listeners_hidden=" + listenersHidden);
 				req.video_stopped = videoState[CAPTURE_DEVICE_CAMERA] != Instance.VIDEO_STATE_ACTIVE;
 				if (conference != null) {
 					req.call = conference.inputGroupCall;
@@ -3057,6 +3067,8 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 								ConnectionsManager.getInstance(currentAccount).sendRequest(req, (response, error) -> {
 
 								});
+							} else {
+								FileLog.d("[KiwigramGhost] Suppressed speaking indicator in VC for account " + currentAccount);
 							}
 						}
 						NotificationCenter.getGlobalInstance().postNotificationName(NotificationCenter.webRtcMicAmplitudeEvent, levels[a]);
@@ -3799,7 +3811,14 @@ public class VoIPService extends Service implements SensorEventListener, AudioMa
 			return;
 		}
 		if (raiseHand != null && raiseHand && KiwigramConfig.isVcHideRaiseHand(currentAccount)) {
+			FileLog.d("[KiwigramGhost] Suppressed raise hand for account " + currentAccount);
 			raiseHand = null;
+			if (mute == null && muteVideo == null && volume == null) {
+				if (onComplete != null) {
+					AndroidUtilities.runOnUIThread(onComplete);
+				}
+				return;
+			}
 		}
 		TL_phone.editGroupCallParticipant req = new TL_phone.editGroupCallParticipant();
 		req.call = groupCall.getInputGroupCall();

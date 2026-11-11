@@ -33,6 +33,9 @@
     <string name="VcCompatibilityNotice">Telegram MTProto Compatibility</string>
     <string name="VcCompatibilityActive">Active: Voice chat supports hidden listeners enabled by channel administrators.</string>
     <string name="VcCompatibilityNoticeDetail">Telegram MTProto does not support individual unilateral stealth joins in regular groups. Listener lists are hidden only when the group/channel administrator enables hidden listeners (groupCall.listeners_hidden). Kiwigram enforces auto-mute, suppresses speaking indicators, and avoids raise-hand actions.</string>
+    <string name="VcCompatibilityUnsupported">Invisible Listener is not supported in this voice chat. Your account may be visible to participants.</string>
+    <string name="VcJoinAsChannelTitle">Channel Identity (Join As)</string>
+    <string name="VcJoinAsChannelDetail">Protect your personal profile by joining voice chats as a channel you manage. Note: The channel will still appear in the participant list.</string>
     <string name="GodMode">God Mode</string>
     <string name="GodModeEnabled">God Mode enabled</string>
     <string name="GodModeDisabled">God Mode disabled</string>

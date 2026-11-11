@@ -235,6 +235,8 @@ public class TlUtils {
                 tlNew.can_start_video = tlOld.can_start_video;
                 tlNew.creator = tlOld.creator;
                 tlNew.can_change_messages_enabled = tlOld.can_change_messages_enabled;
+                tlNew.listeners_hidden = tlOld.listeners_hidden;
+                tlNew.flags = tlOld.listeners_hidden ? (tlNew.flags | (1 << 13)) : (tlNew.flags & ~(1 << 13));
             }
         }
 
